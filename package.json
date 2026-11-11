@@ -1,0 +1,15 @@
+{
+  "name": "scanchecker-vercel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ScanChecker - Vercel serverless (Node + Postgres) rewrite",
+  "scripts": {},
+  "dependencies": {
+    "pg": "^8.11.5",
+    "bcryptjs": "^2.4.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

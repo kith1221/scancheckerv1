@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Kelola Pengguna">
+    <title>Kelola Pengguna | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker · Pengguna</div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="user-badge" id="userBadge">
+            <div class="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" style="font-size:.75rem;font-weight:600;color:var(--text-primary)">-</span>
+                <span class="user-role">-</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="user-menu" id="userMenu">
+    <div class="user-menu-header">
+        <div class="user-avatar-lg"></div>
+        <div>
+            <div class="user-menu-name" id="umName">-</div>
+            <div class="user-menu-role" id="umRole">-</div>
+        </div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <a href="/settings.html" class="user-menu-item">Pengaturan</a>
+    <a href="/users.html" class="user-menu-item">Kelola Pengguna</a>
+    <button class="user-menu-item theme-toggle-row" id="darkModeToggle" title="Ganti tema">
+        <span class="theme-toggle-label"><span id="darkModeMark"></span> <span id="darkModeLabel">Mode Gelap</span></span>
+        <span class="theme-switch" id="darkModeSwitch"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item danger" id="logoutBtn">Keluar</button>
+</div>
+<div class="overlay" id="menuOverlay" style="display:none"></div>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-md)">
+        <div class="section-title" style="margin-bottom:0">
+            <span class="section-title-accent"></span>
+            Daftar Pengguna
+        </div>
+        <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm" onclick="exportUsersPdf()" style="color:#dc2626;border-color:#dc2626">Export PDF</button>
+            <button class="btn btn-primary btn-sm ripple-btn" onclick="openModal('addUserModal')">Tambah</button>
+        </div>
+    </div>
+
+    <div class="search-input-wrapper" style="margin-bottom:var(--space-sm)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="userSearch" class="form-input" placeholder="Cari nama, username, atau toko..." oninput="filterUsers()">
+    </div>
+
+    <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-sm)" id="userCount"></div>
+
+    <div style="display:flex;flex-direction:column;gap:var(--space-sm)" id="userList">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+    </div>
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div class="modal-overlay" id="addUserModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Tambah Pengguna</div>
+        <form id="addUserForm">
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap</label>
+                <input type="text" id="newNama" class="form-input" placeholder="Nama pengguna" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="newUsername" class="form-input" placeholder="Username unik" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="newPassword" class="form-input" placeholder="Min. 6 karakter" required autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Toko / Gudang</label>
+                <input type="text" id="newToko" class="form-input" placeholder="Nama toko" value="Toko Utama">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select id="newRole" class="form-select">
+                    <option value="operator">Operator</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-md)">
+                <button type="button" class="btn btn-ghost btn-block" onclick="closeModal('addUserModal')">Batal</button>
+                <button type="submit" class="btn btn-primary btn-block">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="resetPwModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Reset Password</div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);text-align:center;margin-bottom:var(--space-md)" id="resetPwName"></div>
+        <form id="resetPwForm">
+            <input type="hidden" id="resetPwId">
+            <div class="form-group">
+                <label class="form-label">Password Baru</label>
+                <input type="password" id="resetPwValue" class="form-input" placeholder="Min. 6 karakter" required autocomplete="new-password">
+            </div>
+            <div style="display:flex;gap:var(--space-sm)">
+                <button type="button" class="btn btn-ghost btn-block" onclick="closeModal('resetPwModal')">Batal</button>
+                <button type="submit" class="btn btn-primary btn-block">Reset</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="confirmMessage">Konfirmasi</div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+            <button class="btn btn-ghost btn-block" id="confirmCancel">Batal</button>
+            <button class="btn btn-danger btn-block" id="confirmOk">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/ui.js"></script>
+<script>
+let currentUserId = null;
+let currentUserName = '';
+let allUsers = [];
+
+function filterUsers() {
+    const q = (document.getElementById('userSearch').value || '').trim().toLowerCase();
+    const filtered = allUsers.filter(u =>
+        !q
+        || (u.nama || '').toLowerCase().includes(q)
+        || (u.username || '').toLowerCase().includes(q)
+        || (u.toko || '').toLowerCase().includes(q)
+        || (u.role || '').toLowerCase().includes(q)
+    );
+    document.getElementById('userCount').textContent = q
+        ? `${filtered.length} dari ${allUsers.length} pengguna`
+        : `${allUsers.length} pengguna`;
+    renderUsers(filtered);
+}
+
+function renderUsers(users) {
+    const wrap = document.getElementById('userList');
+    if (users.length === 0) {
+        wrap.innerHTML = `<div class="empty-state" style="padding:24px"><p>Belum ada pengguna</p></div>`;
+        return;
+    }
+    wrap.innerHTML = users.map(u => {
+        const isSelf = u.id === currentUserId;
+        return `<div class="card" style="padding:var(--space-md);animation:fadeInUp 0.3s ease">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-sm)">
+                <div style="display:flex;align-items:center;gap:var(--space-sm)">
+                    <div class="user-avatar" style="width:38px;height:38px;font-size:0.85rem">${escHtml((u.nama||'?').charAt(0).toUpperCase())}</div>
+                    <div>
+                        <div style="font-weight:600;font-size:0.9rem">${escHtml(u.nama)}</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted)">@${escHtml(u.username)}</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center">
+                    <span class="badge ${u.role === 'admin' ? 'badge-primary' : 'badge-info'}">${u.role=== 'admin' ? 'Admin' : 'Operator'}</span>
+                    <span class="badge ${u.active ? 'badge-success' : 'badge-danger'}">${u.active ? 'Aktif' : 'Nonaktif'}</span>
+                </div>
+            </div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:var(--space-sm);display:flex;gap:var(--space-md)">
+                <span>&#127982; ${escHtml(u.toko)}</span>
+                <span>&#128230; ${u.total_scans} scan</span>
+                ${u.last_login ? `<span>&#128336; ${formatDateTime(u.last_login)}</span>` : ''}
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                ${!isSelf ? `<button class="btn btn-ghost btn-sm" onclick="toggleUser(${u.id})">${u.active ? 'Nonaktifkan' : 'Aktifkan'}</button>` : ''}
+                <button class="btn btn-outline btn-sm" onclick="openResetPw(${u.id}, '${escHtml(u.nama).replace(/'/g,"\\'")}')">Reset PW</button>
+                ${!isSelf ? `<button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id}, '${escHtml(u.nama).replace(/'/g,"\\'")}')">Hapus</button>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function formatDateTime(dt) {
+    if (!dt) return '';
+    const d = new Date(dt);
+    const p = x => String(x).padStart(2,'0');
+    return `${p(d.getDate())}/${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function exportUsersPdf() {
+    if (!allUsers.length) { showToast('Tidak ada data untuk diexport.', 'error'); return; }
+    const q = (document.getElementById('userSearch').value || '').trim().toLowerCase();
+    const data = q
+        ? allUsers.filter(u =>
+            (u.nama || '').toLowerCase().includes(q)
+            || (u.username || '').toLowerCase().includes(q)
+            || (u.toko || '').toLowerCase().includes(q)
+            || (u.role || '').toLowerCase().includes(q))
+        : allUsers;
+    const mapDt = dt => {
+        if (!dt) return '-';
+        const d = new Date(dt);
+        if (isNaN(d)) return '-';
+        const p = x => String(x).padStart(2, '0');
+        return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    };
+    const rows = data.map(u => `
+        <tr>
+            <td class="c-nama">${escHtml(u.nama)}</td>
+            <td>${escHtml(u.username)}</td>
+            <td>${u.role === 'admin' ? 'Admin' : 'Operator'}</td>
+            <td>${u.active ? 'Aktif' : 'Nonaktif'}</td>
+            <td class="c-toko">${escHtml(u.toko)}</td>
+            <td class="c-num">${u.total_scans || 0}</td>
+            <td>${mapDt(u.last_login)}</td>
+        </tr>`).join('');
+    const totalScans = data.reduce((a, u) => a + (u.total_scans || 0), 0);
+    const totalRow = `
+        <tr class="total">
+            <td colspan="4" style="text-align:right;font-weight:600">TOTAL JUMLAH AKUN: ${data.length}</td>
+            <td></td>
+            <td class="c-num" style="font-weight:600">${totalScans}</td>
+            <td></td>
+        </tr>`;
+    const printWin = window.open('', '_blank');
+    if (!printWin) { showToast('Izinkan popup untuk export PDF.', 'error'); return; }
+    printWin.document.open();
+    printWin.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Daftar Pengguna - ScanChecker</title>
+<style>
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 20px; }
+.head { text-align: center; border-bottom: 3px solid #C8102E; padding-bottom: 10px; margin-bottom: 14px; }
+.head h1 { margin: 0; font-size: 20px; color: #C8102E; }
+.head .sub { color: #555; font-size: 11px; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: left; font-size: 11px; }
+th { background: #8E1B2E; color: #fff; font-weight: bold; white-space: nowrap; }
+tr:nth-child(even) td { background: #faf0f1; }
+tr.total td { background: #F7DADD; font-weight: bold; }
+.c-num { text-align: right; white-space: nowrap; }
+.c-nama, .c-toko { max-width: 160px; }
+@media print { body { margin: 0; } }
+</style>
+</head>
+<body onload="setTimeout(function(){window.print()},400)">
+    <div class="head">
+        <h1>RankSports — Daftar Pengguna</h1>
+        <div class="sub">Total: ${data.length} pengguna${q ? ' (hasil filter)' : ''} &nbsp;|&nbsp; Dicetak: ${new Date().toLocaleString('id-ID')} oleh ${escHtml(currentUserName)}</div>
+    </div>
+    <table>
+        <thead>
+            <tr><th>Nama</th><th>Username</th><th>Role</th><th>Status</th><th>Toko / Gudang</th><th>Total Scan</th><th>Terakhir Login</th></tr>
+        </thead>
+        <tbody>${rows}${totalRow}</tbody>
+    </table>
+</body>
+</html>`);
+    printWin.document.close();
+}
+
+async function loadUsers() {
+    try {
+        const d = await api('/users');
+        if (!d.success) { document.getElementById('userList').innerHTML = `<div class="empty-state"><p>${escHtml(d.message)}</p></div>`; return; }
+        allUsers = d.data || [];
+        filterUsers();
+    } catch (e) {
+        document.getElementById('userList').innerHTML = `<div class="empty-state"><p>Gagal memuat</p></div>`;
+    }
+}
+
+document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = {
+        action: 'create',
+        nama: document.getElementById('newNama').value.trim(),
+        username: document.getElementById('newUsername').value.trim(),
+        password: document.getElementById('newPassword').value,
+        toko: document.getElementById('newToko').value.trim() || 'Toko Utama',
+        role: document.getElementById('newRole').value,
+    };
+    const d = await api('/users', { method: 'POST', body });
+    if (d.success) { showToast('Pengguna berhasil ditambahkan.', 'success'); closeModal('addUserModal'); e.target.reset(); loadUsers(); }
+    else showToast(d.message || 'Gagal menambah', 'error');
+});
+document.getElementById('resetPwForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('resetPwId').value;
+    const pw = document.getElementById('resetPwValue').value;
+    const d = await api('/users', { method: 'POST', body: { action: 'reset_password', id: parseInt(id,10), new_password: pw } });
+    if (d.success) { showToast('Password berhasil direset.', 'success'); closeModal('resetPwModal'); e.target.reset(); }
+    else showToast(d.message || 'Gagal reset', 'error');
+});
+
+function openResetPw(id, nama) {
+    document.getElementById('resetPwId').value = id;
+    document.getElementById('resetPwName').textContent = 'Pengguna: ' + nama;
+    openModal('resetPwModal');
+}
+async function toggleUser(id) {
+    const d = await api('/users', { method: 'POST', body: { action: 'toggle', id } });
+    showToast(d.message || 'Status diperbarui', d.success ? 'success' : 'error');
+    loadUsers();
+}
+function deleteUser(id, nama) {
+    confirmDialog('Hapus pengguna ' + nama + '?', async () => {
+        const d = await api('/users', { method: 'POST', body: { action: 'delete', id } });
+        showToast(d.message || 'Dihapus', d.success ? 'success' : 'error');
+        loadUsers();
+    });
+}
+
+(async function init() {
+    const user = await initApp();
+    if (!user) return;
+    if (user.role !== 'admin') { window.location.href = '/'; return; }
+    currentUserId = user.id;
+    currentUserName = user.nama || user.username;
+    document.getElementById('umName').textContent = user.nama;
+    document.getElementById('umRole').textContent = user.toko + ' • ' + user.role;
+    document.querySelector('.user-avatar-lg').textContent = (user.nama || '?').charAt(0).toUpperCase();
+    await applyDarkMode();
+    loadUsers();
+})();
+</script>
+</body>
+</html>

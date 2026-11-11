@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="ScanChecker - Login">
+    <title>Login | ScanChecker — RankSports</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+    <meta http-equiv="Cache-Control" content="no-store">
+    <meta http-equiv="Pragma" content="no-cache">
+</head>
+<body style="overflow:hidden">
+
+<div class="login-page">
+    <div class="login-bg-orb login-bg-orb-1"></div>
+    <div class="login-bg-orb login-bg-orb-2"></div>
+
+    <div class="login-card" style="animation:scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1)">
+        <div class="login-logo">
+            <div class="login-logo-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <div class="login-logo-title">RankSports</div>
+            <div class="login-logo-sub">ScanChecker &mdash; Sistem Scan &amp; Tracking Paket Ekspedisi</div>
+        </div>
+
+        <div id="loginError" class="alert alert-danger" style="margin-bottom:var(--space-md);display:none"></div>
+
+        <form id="loginForm" autocomplete="on">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <div style="position:relative">
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Masukkan username" autocomplete="username" required style="padding-left:42px">
+                    <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div style="position:relative">
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Masukkan password" autocomplete="current-password" required style="padding-left:42px;padding-right:42px">
+                    <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <button type="button" id="togglePassword" onclick="togglePw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted)">
+                        <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="cfTurnstileWrap" style="margin-top:var(--space-md);min-height:66px"></div>
+            <div id="cfStatus" style="margin-top:6px;font-size:0.72rem;text-align:center;color:var(--text-muted);min-height:14px">Memuat verifikasi keamanan&hellip; (v3)</div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg ripple-btn" id="loginBtn" style="margin-top:var(--space-md)">
+                Masuk
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-top:var(--space-lg);color:var(--text-muted);font-size:0.75rem" id="loginHint">
+            RankSports &middot; ScanChecker &mdash; Masukkan akun Anda
+        </div>
+    </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+let turnstileToken = '';
+let cfRequired = false;
+
+function setTurnstileError(msg) {
+    console.error('ScanChecker turnstile:', msg);
+    const wrap = document.getElementById('cfTurnstileWrap');
+    if (wrap && !wrap.textContent.trim()) {
+        const d = document.createElement('div');
+        d.style.cssText = 'color:#e11d48;font-size:.8rem;text-align:center;padding:8px;border:1px dashed #fda4af;border-radius:8px;';
+        d.textContent = msg;
+        wrap.appendChild(d);
+    }
+    const st = document.getElementById('cfStatus');
+    if (st) { st.textContent = msg; st.style.color = '#e11d48'; }
+}
+
+function setTsStatus(msg) {
+    const st = document.getElementById('cfStatus');
+    if (st) { st.textContent = msg; st.style.color = '#0a8f3c'; }
+}
+
+window.onTsReady = function () {
+    const wrap = document.getElementById('cfTurnstileWrap');
+    if (!wrap) return;
+    if (!window.turnstile) {
+        setTurnstileError('Verifikasi keamanan tidak dapat dimuat.');
+        return;
+    }
+    try {
+        window._cfRendered = true;
+        window.turnstile.render(wrap, {
+            sitekey: window._cfSiteKey,
+            language: 'id',
+            callback: function (t) { turnstileToken = t; setTsStatus('Verifikasi keamanan selesai'); },
+            'expired-callback': function () { turnstileToken = ''; setTurnstileError('Sesi verifikasi berakhir. Ulangi verifikasi keamanan.'); },
+            'error-callback': function () { turnstileToken = ''; setTurnstileError('Verifikasi keamanan gagal. Muat ulang halaman.'); },
+        });
+        cfRequired = true;
+        setTsStatus('Verifikasi keamanan aktif');
+        console.info('ScanChecker turnstile: widget rendered; sitekey=' + window._cfSiteKey);
+    } catch (err) {
+        setTurnstileError('Verifikasi keamanan gagal dimuat (' + (err && err.message ? err.message : 'error') + ').');
+    }
+};
+
+function initTurnstile(siteKey) {
+    const wrap = document.getElementById('cfTurnstileWrap');
+    if (!siteKey || !wrap) return;
+    window._cfSiteKey = siteKey;
+    const s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTsReady';
+    s.async = true;
+    s.onerror = function () {
+        setTurnstileError('Widget keamanan tidak dapat dimuat. Cek koneksi/AdBlock, lalu muat ulang.');
+    };
+    document.head.appendChild(s);
+    console.info('ScanChecker turnstile: script dimuat, sitekey=' + siteKey);
+    setTimeout(function () {
+        if (window.turnstile && !window._cfRendered) window.onTsReady();
+    }, 2000);
+    setTimeout(function () {
+        if (!cfRequired && !wrap.textContent.trim()) {
+            setTurnstileError('Widget keamanan tidak merespon. Buka lewat https://scencheckv1.vercel.app, pastikan hostname ini terdaftar di dashboard Cloudflare Turnstile, dan nonaktifkan AdBlock untuk situs ini.');
+        }
+    }, 8000);
+}
+
+// Ambil site key Turnstile dari /api/me (401 anonymous). Jika kosong -> tanpa CAPTCHA.
+api('/me').then(function (d) {
+    if (d && d.config) initTurnstile(d.config.turnstileSiteKey);
+}).catch(function () {});
+
+function togglePw() {
+    const input = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+        input.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Memproses...';
+    const errEl = document.getElementById('loginError');
+    errEl.style.display = 'none';
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (cfRequired && !turnstileToken) {
+        errEl.textContent = 'Selesaikan verifikasi keamanan (CAPTCHA) terlebih dahulu.';
+        errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Masuk';
+        return;
+    }
+
+    try {
+        const d = await api('/login', { method: 'POST', body: { username, password, turnstileToken } });
+        if (d.success) {
+            window.location.href = '/';
+        } else {
+            errEl.textContent = d.message || 'Login gagal.';
+            errEl.style.display = 'block';
+        }
+    } catch (err) {
+        errEl.textContent = err.message || 'Terjadi kesalahan.';
+        errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Masuk';
+});
+</script>
+</body>
+</html>

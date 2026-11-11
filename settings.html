@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Pengaturan">
+    <title>Pengaturan | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker · Pengaturan</div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="user-badge" id="userBadge">
+            <div class="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" style="font-size:.75rem;font-weight:600;color:var(--text-primary)">-</span>
+                <span class="user-role">-</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="user-menu" id="userMenu">
+    <div class="user-menu-header">
+        <div class="user-avatar-lg"></div>
+        <div>
+            <div class="user-menu-name" id="umName">-</div>
+            <div class="user-menu-role" id="umRole">-</div>
+        </div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <a href="/settings.html" class="user-menu-item">Pengaturan</a>
+    <a href="/users.html" class="user-menu-item" id="menuUsersWrap" style="display:none">Kelola Pengguna</a>
+    <button class="user-menu-item theme-toggle-row" id="darkModeToggle" title="Ganti tema">
+        <span class="theme-toggle-label"><span id="darkModeMark"></span> <span id="darkModeLabel">Mode Gelap</span></span>
+        <span class="theme-switch" id="darkModeSwitch"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item danger" id="logoutBtn">Keluar</button>
+</div>
+<div class="overlay" id="menuOverlay" style="display:none"></div>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <!-- Profile Section -->
+    <div class="settings-section" style="animation:fadeInUp 0.3s ease">
+        <div class="settings-section-title">Profil</div>
+        <form class="card" onsubmit="saveProfile(event)">
+            <div class="form-group">
+                <label class="form-label">Nama Toko / Gudang</label>
+                <input type="text" id="namaToko" class="form-input" placeholder="Nama toko" required>
+            </div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-sm)">
+                Nama: <span id="profileNama">-</span> &bull; Role: <span id="profileRole">-</span>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Simpan Profil</button>
+        </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="settings-section" style="animation:fadeInUp 0.35s ease 0.05s both">
+        <div class="settings-section-title">Keamanan</div>
+        <form class="card" onsubmit="changePassword(event)">
+            <div class="form-group">
+                <label class="form-label">Password Lama</label>
+                <input type="password" id="oldPw" class="form-input" placeholder="Password saat ini" required autocomplete="current-password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password Baru</label>
+                <input type="password" id="newPw" class="form-input" placeholder="Min. 6 karakter" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="btn btn-outline btn-sm">Ubah Password</button>
+        </form>
+    </div>
+
+    <!-- Ekspedisi Aktif -->
+    <div class="settings-section" style="animation:fadeInUp 0.4s ease 0.1s both">
+        <div class="settings-section-title">Ekspedisi Aktif</div>
+        <form class="card" onsubmit="saveExpedition(event)">
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-md)">Pilih ekspedisi yang ditampilkan di halaman scan:</p>
+            <div id="expeditionCheckboxes" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);margin-bottom:var(--space-md)"></div>
+            <button type="submit" class="btn btn-primary btn-sm">Simpan Ekspedisi</button>
+        </form>
+    </div>
+
+    <!-- Pola Resi Ekspedisi -->
+    <div class="settings-section" style="animation:fadeInUp 0.42s ease 0.12s both">
+        <div class="settings-section-title">Pola / Sampel Resi Ekspedisi</div>
+        <form class="card" onsubmit="saveCourierPatterns(event)">
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-md)">
+                Tulis pola nomor resi tiap ekspedisi dalam bentuk <b>regex</b> (satu pola per baris).
+                Resi yang cocok dengan pola akan otomatis masuk ke ekspedisi tersebut.
+                Biarkan kosong untuk memakai pola bawaan.
+            </p>
+            <div id="patternFields"></div>
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:var(--space-sm)">
+                Tes pola Anda di halaman scan: ketik/skan nomor resi, ekspedisi akan terdeteksi otomatis.
+            </p>
+            <button type="submit" class="btn btn-primary btn-sm">Simpan Pola Resi</button>
+        </form>
+    </div>
+
+    <!-- Notifikasi -->
+    <div class="settings-section" style="animation:fadeInUp 0.45s ease 0.15s both">
+        <div class="settings-section-title">Notifikasi</div>
+        <div class="card">
+            <div class="settings-item" style="border:none;padding:0;margin-bottom:var(--space-md)">
+                <div>
+                    <div class="settings-item-label">Peringatan Duplikat Resi</div>
+                    <div class="settings-item-sub">Notifikasi jika resi sudah pernah discan hari ini</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="notifDuplikat" onchange="saveNotif()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tampilan -->
+    <div class="settings-section" style="animation:fadeInUp 0.5s ease 0.2s both">
+        <div class="settings-section-title">Tampilan</div>
+        <div class="card">
+            <div class="settings-item" style="border:none;padding:0">
+                <div>
+                    <div class="settings-item-label">Mode Gelap</div>
+                    <div class="settings-item-sub">Tampilan gelap lebih nyaman di malam hari</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="darkModeSwitch" onchange="saveDark()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone (admin only) -->
+    <div class="settings-section" id="dangerZone" style="display:none">
+        <div class="settings-section-title" style="color:var(--danger)">Zona Berbahaya</div>
+        <div class="card" style="border-color:rgba(239,68,68,0.3)">
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:var(--space-md)">
+                Hapus semua data scan. Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAll()">Hapus Semua Data Scan</button>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="confirmMessage">Konfirmasi</div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+            <button class="btn btn-ghost btn-block" id="confirmCancel">Batal</button>
+            <button class="btn btn-danger btn-block" id="confirmOk">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/app.js"></script>
+<script src="/js/ui.js"></script>
+<script>
+const ALL_EXPEDITIONS = {
+    'JNT':'J&T Express','JNTC':'J&T Cargo','JNE':'JNE Express','SICEPAT':'SiCepat',
+    'POS':'Pos Indonesia','NINJA':'Ninja Xpress','ANTERAJA':'AnterAja','SPX':'Shopee Express','LAZADA':'Lazada Logistics',
+    'IDX':'ID Express','LION':'Lion Parcel','WAHANA':'Wahana','SAP':'SAP Express','TIKI':'TIKI'
+};
+let settings = {};
+let activeExp = [];
+
+async function saveProfile(e) {
+    e.preventDefault();
+    const namaToko = document.getElementById('namaToko').value.trim();
+    if (!namaToko) { showToast('Nama toko wajib diisi', 'warning'); return; }
+    const d = await api('/account', { method: 'POST', body: { action: 'save_profile', toko: namaToko } }).catch(() => null);
+    if (d && d.success) showToast('Profil berhasil disimpan.', 'success');
+    else showToast((d && d.message) || 'Gagal menyimpan profil', 'error');
+}
+async function changePassword(e) {
+    e.preventDefault();
+    const oldPw = document.getElementById('oldPw').value;
+    const newPw = document.getElementById('newPw').value;
+    try {
+        const d = await api('/account', { method: 'POST', body: { action: 'change_password', old_password: oldPw, new_password: newPw } });
+        if (d.success) { showToast('Password berhasil diubah.', 'success'); e.target.reset(); }
+        else showToast(d.message || 'Gagal mengubah password', 'error');
+    } catch (err) { showToast('Gagal mengubah password', 'error'); }
+}
+function saveExpedition(e) {
+    e.preventDefault();
+    const selected = Array.from(document.querySelectorAll('input[name="expeditions"]:checked')).map(c => c.value);
+    api('/settings', { method: 'POST', body: { key: 'ekspedisi_aktif', value: JSON.stringify(selected) } })
+        .then(d => { if (d.success) { showToast('Ekspedisi aktif disimpan.', 'success'); } })
+        .catch(() => showToast('Gagal menyimpan', 'error'));
+}
+function saveCourierPatterns(e) {
+    e.preventDefault();
+    const patterns = {};
+    for (const code in ALL_EXPEDITIONS) {
+        const raw = document.getElementById('pattern_' + code).value;
+        const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (lines.length) patterns[code] = lines;
+    }
+    api('/settings', { method: 'POST', body: { key: 'courier_patterns', value: JSON.stringify(patterns) } })
+        .then(d => { if (d.success) { showToast('Pola resi ekspedisi disimpan.', 'success'); } })
+        .catch(() => showToast('Gagal menyimpan', 'error'));
+}
+function saveNotif() {
+    const val = document.getElementById('notifDuplikat').checked ? '1' : '0';
+    api('/settings', { method: 'POST', body: { key: 'notif_duplikat', value: val } })
+        .then(() => showToast('Notifikasi disimpan.', 'success'))
+        .catch(() => {});
+}
+function saveDark() {
+    toggleDarkMode();
+}
+function confirmDeleteAll() {
+    confirmDialog('⚠️ Ini akan menghapus SEMUA data scan secara permanen. Lanjutkan?', () => {
+        api('/scan-delete', { method: 'POST', body: { delete_all: true } })
+            .then(d => { if (d.success) showToast('Semua data berhasil dihapus', 'success'); else showToast(d.message, 'error'); })
+            .catch(() => showToast('Gagal menghapus', 'error'));
+    });
+}
+
+async function renderExpeditions() {
+    const box = document.getElementById('expeditionCheckboxes');
+    box.innerHTML = Object.entries(ALL_EXPEDITIONS).map(([code, name]) => `
+        <label class="settings-item" style="cursor:pointer;padding:10px var(--space-sm)">
+            <div>
+                <div class="settings-item-label">${escHtml(name)}</div>
+                <div class="settings-item-sub">${code}</div>
+            </div>
+            <input type="checkbox" name="expeditions" value="${code}" ${activeExp.includes(code) ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--primary)">
+        </label>`).join('');
+}
+async function renderPatterns() {
+    const wrap = document.getElementById('patternFields');
+    let patterns = {};
+    try { patterns = JSON.parse(settings.courier_patterns || '{}') || {}; } catch (e) {}
+    wrap.innerHTML = Object.entries(ALL_EXPEDITIONS).map(([code, name]) => `
+        <div class="form-group">
+            <label class="form-label" style="font-size:0.85rem">${escHtml(name)} <span style="color:var(--text-muted)">(${code})</span></label>
+            <textarea id="pattern_${code}" class="form-input" rows="3" placeholder="^JP\\d{10}&#10;^JT\\d{10}"
+                style="font-family:monospace;font-size:0.82rem;resize:vertical">${escHtml((patterns[code] || []).join('\n'))}</textarea>
+        </div>`).join('');
+}
+
+(async function init() {
+    const user = await initApp();
+    if (!user) return;
+    document.getElementById('umName').textContent = user.nama;
+    document.getElementById('umRole').textContent = user.toko + ' • ' + user.role;
+    document.querySelector('.user-avatar-lg').textContent = (user.nama || '?').charAt(0).toUpperCase();
+    document.getElementById('profileNama').textContent = user.nama;
+    document.getElementById('profileRole').textContent = user.role;
+
+    const d = await api('/settings').catch(() => null);
+    if (d && d.success) {
+        settings = d.data || {};
+        document.getElementById('namaToko').value = settings.nama_toko || user.toko;
+        document.getElementById('notifDuplikat').checked = (settings.notif_duplikat || '1') === '1';
+        document.getElementById('darkModeSwitch').checked = (settings.dark_mode || '0') === '1';
+        try { activeExp = JSON.parse(settings.ekspedisi_aktif || '[]') || []; } catch (e) { activeExp = []; }
+    }
+    if (user.role === 'admin') document.getElementById('dangerZone').style.display = '';
+    await applyDarkMode();
+    renderExpeditions();
+    renderPatterns();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Database">
+    <title>Database | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker · Database</div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="user-badge" id="userBadge">
+            <div class="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" style="font-size:.75rem;font-weight:600;color:var(--text-primary)">-</span>
+                <span class="user-role">-</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="user-menu" id="userMenu">
+    <div class="user-menu-header">
+        <div class="user-avatar-lg"></div>
+        <div>
+            <div class="user-menu-name" id="umName">-</div>
+            <div class="user-menu-role" id="umRole">-</div>
+        </div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <a href="/settings.html" class="user-menu-item">Pengaturan</a>
+    <a href="/users.html" class="user-menu-item" id="menuUsersWrap" style="display:none">Kelola Pengguna</a>
+    <button class="user-menu-item theme-toggle-row" id="darkModeToggle" title="Ganti tema">
+        <span class="theme-toggle-label"><span id="darkModeMark"></span> <span id="darkModeLabel">Mode Gelap</span></span>
+        <span class="theme-switch" id="darkModeSwitch"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item danger" id="logoutBtn">Keluar</button>
+</div>
+<div class="overlay" id="menuOverlay" style="display:none"></div>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <div style="animation:fadeInUp 0.3s ease">
+        <div class="section-title" style="margin-bottom:var(--space-sm)">
+            <span class="section-title-accent"></span>
+            Filter Data
+        </div>
+
+        <div class="filter-bar">
+            <div class="search-input-wrapper" style="min-width:100%">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="filterSearch" class="form-input" placeholder="Cari no. resi..." oninput="clearTimeout(window._st);window._st=setTimeout(()=>loadData(1),600)">
+            </div>
+            <input type="date" id="filterDate" class="form-input" onchange="loadData(1)" style="flex:1;min-width:130px">
+            <div class="ms-wrapper" id="wrapEkspedisi">
+                <button type="button" class="form-select ms-btn" onclick="toggleMs('ekspedisi')">
+                    <span class="ms-label" id="msEkspedisiLabel">Semua Ekspedisi</span>
+                    <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="ms-panel" id="msEkspedisiPanel">
+                    <div class="ms-actions">
+                        <label class="ms-all-item">
+                            <input type="checkbox" class="ms-check-all" data-ms="ekspedisi" checked onchange="msToggleAll('ekspedisi')">
+                            <span>Pilih Semua</span>
+                        </label>
+                    </div>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="JNT" checked onchange="msChange('ekspedisi')"> J&amp;T Express</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="JNTC" checked onchange="msChange('ekspedisi')"> J&amp;T Cargo</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="JNE" checked onchange="msChange('ekspedisi')"> JNE Express</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="SICEPAT" checked onchange="msChange('ekspedisi')"> SiCepat</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="POS" checked onchange="msChange('ekspedisi')"> Pos Indonesia</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="NINJA" checked onchange="msChange('ekspedisi')"> Ninja Xpress</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="ANTERAJA" checked onchange="msChange('ekspedisi')"> AnterAja</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="SPX" checked onchange="msChange('ekspedisi')"> Shopee Express</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="LAZADA" checked onchange="msChange('ekspedisi')"> Lazada Logistics</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="IDX" checked onchange="msChange('ekspedisi')"> ID Express</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="LION" checked onchange="msChange('ekspedisi')"> Lion Parcel</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="WAHANA" checked onchange="msChange('ekspedisi')"> Wahana</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="SAP" checked onchange="msChange('ekspedisi')"> SAP Express</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="TIKI" checked onchange="msChange('ekspedisi')"> TIKI</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="ekspedisi" value="OTHER" checked onchange="msChange('ekspedisi')"> Lainnya</label>
+                </div>
+            </div>
+            <select id="filterOperator" class="form-select" onchange="loadData(1)" style="flex:1;min-width:150px;display:none">
+                <option value="">Semua Operator</option>
+            </select>
+            <div id="operatorSearchWrap" style="flex:1;min-width:170px;display:none;position:relative">
+                <div class="search-input-wrapper">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="operatorSearch" class="form-input" placeholder="Cari operator..." oninput="filterOperatorOptions()">
+                </div>
+            </div>
+            <div class="ms-wrapper" id="wrapJenis" style="min-width:120px">
+                <button type="button" class="form-select ms-btn" onclick="toggleMs('jenis')">
+                    <span class="ms-label" id="msJenisLabel">Semua Jenis</span>
+                    <svg class="ms-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="ms-panel" id="msJenisPanel">
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="jenis" value="pengiriman" checked onchange="msChange('jenis')"> Pengiriman</label>
+                    <label class="ms-item"><input type="checkbox" class="ms-check" data-ms="jenis" value="retur" checked onchange="msChange('jenis')"> Retur</label>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm);margin-bottom:var(--space-md)">
+            <button class="btn btn-ghost btn-sm" onclick="resetFilter()">Reset</button>
+            <button class="btn btn-outline btn-sm" onclick="exportPrint()" style="color:#C8102E;border-color:#C8102E">Export</button>
+            <button id="cleanupBtn" class="btn btn-outline btn-sm" onclick="openCleanup()" style="display:none;color:#dc2626;border-color:#dc2626">Pembersihan</button>
+        </div>
+
+        <div id="bulkBar" class="filter-bar" style="margin-top:var(--space-sm);display:none">
+            <span style="font-size:0.85rem;color:var(--text-primary)"><span id="selectedCount">0</span> data terpilih</span>
+            <button id="deleteBtn" class="btn btn-outline btn-sm" onclick="handleDeleteClick()" style="color:#dc2626;border-color:#dc2626">Hapus Terpilih</button>
+        </div>
+    </div>
+
+    <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-sm)">
+        Total: <strong id="totalResult" style="color:var(--text-primary)">-</strong> data
+    </div>
+
+    <div class="table-wrapper" style="animation:fadeInUp 0.4s ease 0.1s both">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width:34px"><input type="checkbox" id="checkAllHead" title="Pilih semua di halaman ini" onchange="toggleAll()"></th>
+                    <th>#</th>
+                    <th>No Resi</th>
+                    <th>Ekspedisi</th>
+                    <th>Jenis</th>
+                    <th>Keterangan</th>
+                    <th>Operator</th>
+                    <th>Tgl / Waktu</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="dataTableBody"></tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="8" style="text-align:right;font-weight:bold;color:var(--text-primary)">Total Data</td>
+                    <td id="totalResultFooter" style="text-align:center;font-weight:bold;color:#C8102E">-</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="confirmMessage">Konfirmasi</div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+            <button class="btn btn-ghost btn-block" id="confirmCancel">Batal</button>
+            <button class="btn btn-danger btn-block" id="confirmOk">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Detail Scan</div>
+        <div id="detailBody" style="display:flex;flex-direction:column;gap:var(--space-sm)"></div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+            <button class="btn btn-ghost btn-block" onclick="closeModal('detailModal')">Tutup</button>
+            <button class="btn btn-outline btn-block" id="detailEditBtn" onclick="editScanFromDetail()">Ubah</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Ubah Data Scan</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-sm)">
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">No. Resi</label>
+                <input type="text" id="editResi" class="form-input" style="text-transform:uppercase" autocomplete="off">
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Ekspedisi</label>
+                <select id="editEkspedisi" class="form-select"></select>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Jenis</label>
+                <select id="editJenis" class="form-select">
+                    <option value="pengiriman">Pengiriman</option>
+                    <option value="retur">Retur</option>
+                </select>
+            </div>
+            <div id="editReturWrap" style="display:none;flex-direction:column;gap:var(--space-sm)">
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">SKU</label>
+                    <input type="text" id="editSku" class="form-input" autocomplete="off">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Nama Produk</label>
+                    <input type="text" id="editProduk" class="form-input" autocomplete="off">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Kondisi</label>
+                    <div style="display:flex;gap:8px">
+                        <button type="button" class="btn btn-sm cond-btn" data-cond="sesuai" onclick="editKondisi('sesuai')">Sesuai</button>
+                        <button type="button" class="btn btn-sm cond-btn" data-cond="tsesuai" onclick="editKondisi('tsesuai')">Tidak Sesuai</button>
+                    </div>
+                    <input type="hidden" id="editKondisi" value="">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Keterangan Kondisi</label>
+                    <textarea id="editKeterangan" class="form-input" rows="2"></textarea>
+                </div>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Catatan</label>
+                <textarea id="editCatatan" class="form-input" rows="2"></textarea>
+            </div>
+        </div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+            <button class="btn btn-ghost btn-block" onclick="closeModal('editModal')">Batal</button>
+            <button class="btn btn-primary btn-block" onclick="saveEdit()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="cleanupModal">
+    <div class="modal-sheet" style="max-height:90vh;overflow-y:auto">
+        <div class="modal-handle"></div>
+        <div class="modal-title" style="color:#dc2626">Pembersihan Database</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-sm)">
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Rentang Tanggal <span style="opacity:.6">(kosongkan bila seluruh periode)</span></label>
+                <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap">
+                    <input type="date" id="cleanFrom" class="form-input" style="flex:1;min-width:130px">
+                    <span style="display:flex;align-items:center;color:var(--text-muted)">&ndash;</span>
+                    <input type="date" id="cleanTo" class="form-input" style="flex:1;min-width:130px">
+                </div>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Jenis</label>
+                <div id="cleanJenis" style="display:flex;gap:8px;flex-wrap:wrap">
+                    <label class="ms-item" style="padding:8px 12px;border:1px solid var(--border);border-radius:10px"><input type="checkbox" value="pengiriman" checked> Pengiriman</label>
+                    <label class="ms-item" style="padding:8px 12px;border:1px solid var(--border);border-radius:10px"><input type="checkbox" value="retur" checked> Retur</label>
+                </div>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Ekspedisi</label>
+                <div id="cleanEkspedisi" style="display:grid;grid-template-columns:1fr 1fr;gap:2px"></div>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Operator</label>
+                <select id="cleanOperator" class="form-select">
+                    <option value="">Semua Operator</option>
+                </select>
+            </div>
+            <div id="cleanPreview" style="font-size:.85rem;color:var(--text-primary);background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:10px 12px">
+                Tekan &quot;Hitung Data&quot; untuk melihat jumlah yang cocok.
+            </div>
+        </div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg);flex-wrap:wrap">
+            <button class="btn btn-ghost btn-block" onclick="closeModal('cleanupModal')">Tutup</button>
+            <button class="btn btn-outline btn-block" onclick="previewCleanup()">Hitung Data</button>
+            <button class="btn btn-danger btn-block" onclick="doCleanup()">Hapus Massal</button>
+        </div>
+    </div>
+</div>
+
+<script src="/js/courier.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/ui.js"></script>
+<script>
+let currentPage = 1;
+let totalPages = 1;
+const PER_PAGE = 20;
+let currentFilters = {};
+let allOperatorOptions = [];
+
+const MS_ALL_LABEL = { ekspedisi: 'Semua Ekspedisi', jenis: 'Semua Jenis' };
+
+function getMsValues(name) {
+    return Array.from(document.querySelectorAll(`.ms-check[data-ms="${name}"]:checked`)).map(c => c.value);
+}
+function updateMsLabel(name) {
+    const vals = getMsValues(name);
+    const total = document.querySelectorAll(`.ms-check[data-ms="${name}"]`).length;
+    const label = document.getElementById(`ms${name.charAt(0).toUpperCase() + name.slice(1)}Label`);
+    if (!label) return;
+    label.textContent = !vals.length || vals.length === total ? MS_ALL_LABEL[name] : `${vals.length} Dipilih`;
+}
+function toggleMs(name) {
+    document.getElementById(`wrap${name.charAt(0).toUpperCase() + name.slice(1)}`).classList.toggle('open');
+}
+function closeAllMs() {
+    document.querySelectorAll('.ms-wrapper').forEach(w => w.classList.remove('open'));
+}
+function msChange(name) {
+    updateMsLabel(name);
+    updateMsAllState(name);
+    loadData(1);
+}
+function msToggleAll(name) {
+    const master = document.querySelector(`.ms-check-all[data-ms="${name}"]`);
+    if (!master) return;
+    const target = master.checked;
+    document.querySelectorAll(`.ms-check[data-ms="${name}"]`).forEach(c => { c.checked = target; });
+    updateMsLabel(name);
+    loadData(1);
+}
+function msClear(name) {
+    document.querySelectorAll(`.ms-check[data-ms="${name}"]`).forEach(c => { c.checked = false; });
+    const master = document.querySelector(`.ms-check-all[data-ms="${name}"]`);
+    if (master) { master.checked = false; master.indeterminate = false; }
+    updateMsLabel(name);
+    loadData(1);
+}
+function updateMsAllState(name) {
+    const master = document.querySelector(`.ms-check-all[data-ms="${name}"]`);
+    if (!master) return;
+    const boxes = Array.from(document.querySelectorAll(`.ms-check[data-ms="${name}"]`));
+    const checked = boxes.filter(c => c.checked).length;
+    master.checked = checked === boxes.length;
+    master.indeterminate = checked > 0 && checked < boxes.length;
+}
+function selectAllMs(name, checked) {
+    document.querySelectorAll(`.ms-check[data-ms="${name}"]`).forEach(c => { c.checked = checked; });
+    updateMsAllState(name);
+    updateMsLabel(name);
+}
+function setMsValues(name, arr) {
+    const set = new Set(arr.filter(Boolean));
+    document.querySelectorAll(`.ms-check[data-ms="${name}"]`).forEach(c => { c.checked = set.has(c.value); });
+    updateMsAllState(name);
+    updateMsLabel(name);
+}
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.ms-wrapper')) return;
+    closeAllMs();
+});
+
+async function loadData(page = 1) {
+    currentPage = page;
+    showTableLoading();
+    const date = document.getElementById('filterDate').value;
+    const search = document.getElementById('filterSearch').value.trim();
+    const eksp = getMsValues('ekspedisi').join(',');
+    const jenis = getMsValues('jenis').join(',');
+    const operator = document.getElementById('filterOperator').value;
+    currentFilters = { date, search, ekspedisi: eksp, jenis, user_id: operator, page, per_page: PER_PAGE };
+    const params = new URLSearchParams();
+    for (const k in currentFilters) if (currentFilters[k]) params.set(k, currentFilters[k]);
+    try {
+        const d = await api('/scan-list?' + params.toString());
+        if (!d.success) throw new Error(d.message);
+        renderTable(d.data.scans || []);
+        renderPagination(d.data.total || 0);
+        document.getElementById('totalResult').textContent = d.data.total || 0;
+        document.getElementById('totalResultFooter').textContent = d.data.total || 0;
+    } catch (err) {
+        showToast(err.message || 'Gagal memuat data', 'error');
+        document.getElementById('dataTableBody').innerHTML = '';
+    }
+}
+
+function showTableLoading() {
+    document.getElementById('dataTableBody').innerHTML =
+        Array(5).fill(0).map(() => `<tr>
+            <td><div class="skeleton skeleton-line" style="width:80px"></div></td>
+            <td><div class="skeleton skeleton-line long"></div></td>
+            <td><div class="skeleton skeleton-line short"></div></td>
+            <td><div class="skeleton skeleton-line short"></div></td>
+            <td><div class="skeleton skeleton-line short"></div></td>
+            <td><div class="skeleton skeleton-line" style="width:60px"></div></td>
+        </tr>`).join('');
+}
+
+function renderTable(scans) {
+    const tbody = document.getElementById('dataTableBody');
+    if (scans.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="table-empty">
+            <div class="empty-state" style="padding:24px"><p>Tidak ada data ditemukan</p></div>
+        </td></tr>`;
+        return;
+    }
+    let no = (currentPage - 1) * PER_PAGE + 1;
+    tbody.innerHTML = scans.map(s => {
+        const ket = s.jenis === 'retur'
+            ? `${s.sku_retur ? 'SKU ' + escHtml(s.sku_retur) + ' · ' : ''}${escHtml(s.produk_retur || '')}${s.kondisi_retur ? ' · ' + (s.kondisi_retur === 'sesuai' ? 'Sesuai' : 'Tidak Sesuai') : ''}${s.keterangan_retur ? ' · ' + escHtml(s.keterangan_retur) : ''}`
+            : '-';
+        return `
+        <tr>
+            <td style="text-align:center"><input type="checkbox" class="row-check" value="${s.id}" onchange="updateBulkUI()"></td>
+            <td style="color:var(--text-muted)">${no++}</td>
+            <td style="font-weight:600;font-family:monospace;font-size:0.85rem"><a href="javascript:void(0)" onclick="cekStatus('${escHtml(s.no_resi)}')" title="Lacak di cekresi.com" style="color:var(--text-primary);text-decoration:underline;text-underline-offset:2px">${escHtml(s.no_resi)}</a></td>
+            <td>${courierBadge(s.ekspedisi_kode)}</td>
+            <td><span class="badge ${s.jenis === 'retur' ? 'badge-warning' : 'badge-success'}">${s.jenis === 'retur' ? 'Retur' : 'Pengiriman'}</span></td>
+            <td style="color:var(--text-secondary);font-size:0.8rem">${ket}</td>
+            <td style="color:var(--text-secondary);font-size:0.8rem">${escHtml(s.username)}</td>
+            <td style="color:var(--text-muted);font-size:0.8rem;white-space:nowrap">${formatDate(s.scan_date)}<br><small>${formatTime(s.scan_time)}</small></td>
+            <td>
+                <div style="display:flex;gap:6px">
+                    <button class="btn btn-sm btn-outline" onclick="viewScan(${s.id})" title="Detail">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="editScan(${s.id})" title="Ubah">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="btn btn-sm btn-outline" onclick="cekStatus('${escHtml(s.no_resi)}')" title="Lacak di cekresi.com">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h4l2 5 4-11 2 6h4"/></svg>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteRow(${s.id})" title="Hapus">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </button>
+                </div>`;}).join('');
+}
+
+function renderPagination(total) {
+    totalPages = Math.ceil(total / PER_PAGE);
+    const container = document.getElementById('pagination');
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+    let html = `<button class="page-btn" onclick="loadData(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>&#8249;</button>`;
+    const range = 2;
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - range && i <= currentPage + range)) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="loadData(${i})">${i}</button>`;
+        } else if (i === currentPage - range - 1 || i === currentPage + range + 1) {
+            html += `<span style="color:var(--text-muted);padding:0 4px">…</span>`;
+        }
+    }
+    html += `<button class="page-btn" onclick="loadData(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&#8250;</button>`;
+    container.innerHTML = html;
+}
+
+function resetFilter() {
+    document.getElementById('filterDate').value = todayString();
+    document.getElementById('filterSearch').value = '';
+    selectAllMs('ekspedisi', true);
+    selectAllMs('jenis', true);
+    document.getElementById('filterOperator').value = '';
+    closeAllMs();
+    loadData(1);
+}
+
+function deleteRow(id) {
+    confirmDialog('Hapus data scan ini?', async () => {
+        try {
+            const d = await api('/scan-delete', { method: 'POST', body: { id } });
+            if (d.success) { showToast('Data berhasil dihapus', 'success'); loadData(currentPage); }
+            else showToast(d.message || 'Gagal menghapus', 'error');
+        } catch (e) { showToast('Gagal menghapus', 'error'); }
+    });
+}
+
+// ---------- READ (Detail) & UPDATE (Edit) ----------
+let _detailId = null;
+let _editingId = null;
+
+function detailRow(label, value) {
+    return `<div style="display:flex;justify-content:space-between;gap:var(--space-md);padding:10px 12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px">
+        <span style="color:var(--text-muted);font-size:.8rem;flex-shrink:0">${label}</span>
+        <span style="color:var(--text-primary);font-size:.85rem;text-align:right;word-break:break-word">${value}</span>
+    </div>`;
+}
+
+async function viewScan(id) {
+    try {
+        const d = await api('/scan-list?id=' + id);
+        if (!d.success) throw new Error(d.message);
+        _detailId = id;
+        const s = d.data;
+        const eksp = (s.ekspedisi_kode ? courierBadge(s.ekspedisi_kode) : escHtml(s.ekspedisi));
+        document.getElementById('detailBody').innerHTML =
+            detailRow('No. Resi', escHtml(s.no_resi)) +
+            detailRow('Ekspedisi', eksp) +
+            detailRow('Jenis', s.jenis === 'retur' ? 'Retur' : 'Pengiriman') +
+            detailRow('Operator', escHtml(s.username)) +
+            detailRow('Toko', escHtml(s.toko)) +
+            detailRow('Tanggal', formatDate(s.scan_date) + ' ' + formatTime(s.scan_time)) +
+            (s.jenis === 'retur'
+                ? detailRow('SKU', escHtml(s.sku_retur || '-')) +
+                  detailRow('Produk', escHtml(s.produk_retur || '-')) +
+                  detailRow('Kondisi', s.kondisi_retur === 'sesuai' ? 'Sesuai' : (s.kondisi_retur ? 'Tidak Sesuai' : '-')) +
+                  detailRow('Keterangan', escHtml(s.keterangan_retur || '-'))
+                : '') +
+            (s.catatan ? detailRow('Catatan', escHtml(s.catatan)) : '');
+        openModal('detailModal');
+    } catch (err) {
+        showToast(err.message || 'Gagal memuat detail', 'error');
+    }
+}
+
+function editScanFromDetail() {
+    closeModal('detailModal');
+    if (_detailId) editScan(_detailId);
+}
+
+function editKondisi(k) {
+    document.getElementById('editKondisi').value = k;
+    document.querySelectorAll('#editModal .cond-btn').forEach(b => {
+        b.classList.toggle('btn-primary', b.dataset.cond === k);
+        b.classList.toggle('btn-outline', b.dataset.cond !== k);
+    });
+}
+
+function fillEkspedisiSelect(selectedCode) {
+    const sel = document.getElementById('editEkspedisi');
+    const all = getAllCouriers();
+    const options = all.map(c =>
+        `<option value="${c.code}" ${c.code === selectedCode ? 'selected' : ''}>${c.name}</option>`
+    ).join('') + `<option value="OTHER" ${selectedCode === 'OTHER' ? 'selected' : ''}>Lainnya</option>`;
+    sel.innerHTML = options;
+}
+
+function setupEditReturForm(jenis) {
+    const wrap = document.getElementById('editReturWrap');
+    if (jenis === 'retur') {
+        wrap.style.display = 'flex';
+    } else {
+        wrap.style.display = 'none';
+    }
+}
+
+async function editScan(id) {
+    try {
+        const d = await api('/scan-list?id=' + id);
+        if (!d.success) throw new Error(d.message);
+        _editingId = id;
+        const s = d.data;
+        document.getElementById('editResi').value = s.no_resi || '';
+        fillEkspedisiSelect(s.ekspedisi_kode || 'OTHER');
+        document.getElementById('editJenis').value = s.jenis === 'retur' ? 'retur' : 'pengiriman';
+        document.getElementById('editSku').value = s.sku_retur || '';
+        document.getElementById('editProduk').value = s.produk_retur || '';
+        document.getElementById('editKeterangan').value = s.keterangan_retur || '';
+        document.getElementById('editCatatan').value = s.catatan || '';
+        if (s.jenis === 'retur' && s.kondisi_retur) {
+            editKondisi(s.kondisi_retur === 'sesuai' ? 'sesuai' : 'tsesuai');
+        } else {
+            document.getElementById('editKondisi').value = '';
+            document.querySelectorAll('#editModal .cond-btn').forEach(b => {
+                b.classList.add('btn-outline');
+                b.classList.remove('btn-primary');
+            });
+        }
+        setupEditReturForm(s.jenis === 'retur' ? 'retur' : 'pengiriman');
+        openModal('editModal');
+    } catch (err) {
+        showToast(err.message || 'Gagal memuat data untuk diubah', 'error');
+    }
+}
+
+async function saveEdit() {
+    const id = _editingId;
+    if (!id) return;
+    const resi = document.getElementById('editResi').value.trim();
+    if (!resi || resi.length < 5) { showToast('No. resi minimal 5 karakter', 'warning'); return; }
+    const jenis = document.getElementById('editJenis').value;
+    const body = {
+        id,
+        no_resi: resi.toUpperCase(),
+        ekspedisi: courierName(document.getElementById('editEkspedisi').value),
+        ekspedisi_kode: document.getElementById('editEkspedisi').value,
+        jenis,
+        catatan: document.getElementById('editCatatan').value.trim(),
+    };
+    if (jenis === 'retur') {
+        const produk = document.getElementById('editProduk').value.trim();
+        const kondisi = document.getElementById('editKondisi').value;
+        if (!produk) { showToast('Nama produk retur wajib diisi', 'warning'); return; }
+        if (!kondisi) { showToast('Pilih kondisi retur (Sesuai / Tidak Sesuai)', 'warning'); return; }
+        body.produk_retur = produk;
+        body.kondisi_retur = kondisi === 'sesuai' ? 'sesuai' : 'tidak sesuai';
+        body.keterangan_retur = document.getElementById('editKeterangan').value.trim();
+        body.sku_retur = document.getElementById('editSku').value.trim();
+    }
+    try {
+        const d = await api('/scan-list', { method: 'POST', body });
+        if (d.success) {
+            showToast(d.message || 'Data berhasil diperbarui', 'success');
+            closeModal('editModal');
+            loadData(currentPage);
+        } else {
+            showToast(d.message || 'Gagal memperbarui', 'error');
+        }
+    } catch (e) {
+        showToast('Gagal memperbarui', 'error');
+    }
+}
+
+function courierName(code) {
+    const c = getAllCouriers().find(x => x.code === code);
+    return c ? c.name : (code === 'OTHER' ? 'Lainnya' : code);
+}
+
+
+function cekStatus(resi) {
+    const r = String(resi || '').trim();
+    if (!r) return;
+    const no = r.replace(/[\s-]/g, '');
+    window.open('https://cekresi.com/?noresi=' + encodeURIComponent(no), '_blank', 'noopener');
+    const msg = 'No resi sudah terisi di cekresi.com. Cadangan disalin: ' + r + (window.isSecureContext ? '' : ' (salin manual: ' + r + ')');
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(r).then(
+                () => showToast(msg, 'success'),
+                () => showToast(msg, 'info')
+            );
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = r;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); showToast(msg, 'success'); }
+            catch (e) { showToast(msg, 'info'); }
+            document.body.removeChild(ta);
+        }
+    } catch (e) {
+        showToast('No resi: ' + r + '. Buka cekresi.com lalu paste.', 'info');
+    }
+}
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.row-check:checked')).map(c => parseInt(c.value, 10));
+}
+
+function updateBulkUI() {
+    const ids = getSelectedIds();
+    const checks = document.querySelectorAll('.row-check');
+    const allSelected = checks.length > 0 && ids.length === checks.length;
+    document.getElementById('selectedCount').textContent = ids.length;
+    const head = document.getElementById('checkAllHead');
+    if (head) {
+        head.checked = allSelected;
+        head.indeterminate = ids.length > 0 && !allSelected;
+    }
+    const btn = document.getElementById('deleteBtn');
+    if (btn) {
+        btn.textContent = allSelected
+            ? `Hapus Semua (${ids.length})`
+            : ids.length
+                ? `Hapus Terpilih (${ids.length})`
+                : 'Hapus Terpilih';
+    }
+    document.getElementById('bulkBar').style.display = 'flex';
+}
+
+function handleDeleteClick() {
+    const checks = document.querySelectorAll('.row-check');
+    const ids = getSelectedIds();
+    const allSelected = checks.length > 0 && ids.length === checks.length;
+    if (allSelected) deleteAll();
+    else deleteSelected();
+}
+
+function toggleAll() {
+    const head = document.getElementById('checkAllHead');
+    const checks = document.querySelectorAll('.row-check');
+    checks.forEach(c => c.checked = head.checked);
+    updateBulkUI();
+}
+
+function deleteSelected() {
+    const ids = getSelectedIds();
+    if (!ids.length) { showToast('Pilih minimal satu data terlebih dahulu', 'error'); return; }
+    confirmDialog(`Hapus ${ids.length} data terpilih?`, async () => {
+        try {
+            const d = await api('/scan-delete', { method: 'POST', body: { ids } });
+            if (d.success) { showToast(d.message || 'Data berhasil dihapus', 'success'); loadData(currentPage); }
+            else showToast(d.message || 'Gagal menghapus', 'error');
+        } catch (e) { showToast('Gagal menghapus', 'error'); }
+    });
+}
+
+function deleteAll() {
+    confirmDialog('Hapus SEMUA data scan? Tindakan ini tidak bisa dibatalkan.', async () => {
+        try {
+            const d = await api('/scan-delete', { method: 'POST', body: { delete_all: true } });
+            if (d.success) { showToast(d.message || 'Semua data berhasil dihapus', 'success'); loadData(1); }
+            else showToast(d.message || 'Gagal menghapus', 'error');
+        } catch (e) { showToast('Gagal menghapus', 'error'); }
+    });
+}
+
+// ---------- PEMBERSIHAN DATABASE (massal) ----------
+const CLEAN_EXP_LIST = [
+    ['JNT', 'J&T Express'], ['JNTC', 'J&T Cargo'], ['JNE', 'JNE Express'],
+    ['SICEPAT', 'SiCepat'], ['POS', 'Pos Indonesia'], ['NINJA', 'Ninja Xpress'],
+    ['ANTERAJA', 'AnterAja'], ['SPX', 'Shopee Express'], ['LAZADA', 'Lazada Logistics'], ['OTHER', 'Lainnya'],
+];
+
+function openCleanup() {
+    const expBox = document.getElementById('cleanEkspedisi');
+    if (!expBox.dataset.built) {
+        expBox.innerHTML = CLEAN_EXP_LIST.map(([v, l]) =>
+            `<label class="ms-item"><input type="checkbox" class="clean-exp" value="${v}" checked> ${escHtml(l)}</label>`).join('');
+        expBox.dataset.built = '1';
+    }
+    const op = document.getElementById('cleanOperator');
+    op.innerHTML = '<option value="">Semua Operator</option>' +
+        allOperatorOptions.map(o => `<option value="${o.id}">${escHtml(o.label)}</option>`).join('');
+    setCleanPreview('Tekan "Hitung Data" untuk melihat jumlah yang cocok.');
+    openModal('cleanupModal');
+}
+
+function getCleanFilters() {
+    const f = {};
+    const from = document.getElementById('cleanFrom').value;
+    const to = document.getElementById('cleanTo').value;
+    if (from) f.date_from = from;
+    if (to) f.date_to = to;
+    const jenis = Array.from(document.querySelectorAll('#cleanJenis input:checked')).map(c => c.value.trim());
+    if (jenis.length) f.jenis = jenis;
+    const exp = Array.from(document.querySelectorAll('#cleanEkspedisi .clean-exp:checked')).map(c => c.value.trim());
+    if (exp.length) f.ekspedisi = exp;
+    const uid = document.getElementById('cleanOperator').value;
+    if (uid) f.user_id = uid;
+    return f;
+}
+
+function setCleanPreview(msg, danger) {
+    const el = document.getElementById('cleanPreview');
+    el.textContent = msg;
+    el.style.color = danger ? '#f87171' : 'var(--text-primary)';
+}
+
+async function previewCleanup() {
+    const f = getCleanFilters();
+    const hasFilter = f.date_from || f.date_to || f.jenis || f.ekspedisi || f.user_id;
+    if (!hasFilter) { setCleanPreview('Pilih minimal satu kriteria pembersihan.', true); return; }
+    try {
+        const d = await api('/scan-delete', { method: 'POST', body: { preview: true, filters: f } });
+        if (d.success) setCleanPreview(`${d.count} data akan dihapus.`, d.count > 0);
+        else { setCleanPreview(d.message || 'Gagal menghitung.', true); showToast(d.message || 'Gagal menghitung', 'error'); }
+    } catch (e) { setCleanPreview('Terjadi kesalahan saat menghitung.', true); showToast('Gagal menghitung', 'error'); }
+}
+
+async function doCleanup() {
+    const f = getCleanFilters();
+    const hasFilter = f.date_from || f.date_to || f.jenis || f.ekspedisi || f.user_id;
+    if (!hasFilter) { setCleanPreview('Pilih minimal satu kriteria pembersihan.', true); return; }
+    let count = 0;
+    try {
+        const p = await api('/scan-delete', { method: 'POST', body: { preview: true, filters: f } });
+        if (!p.success) { setCleanPreview(p.message || 'Gagal menghitung.', true); return; }
+        count = p.count || 0;
+    } catch (e) { setCleanPreview('Terjadi kesalahan saat menghitung.', true); return; }
+    if (!count) { setCleanPreview('Tidak ada data yang cocok dengan kriteria.', true); showToast('Tidak ada data yang cocok', 'warning'); return; }
+    confirmDialog(`Hapus ${count} data? Tindakan ini tidak bisa dibatalkan.`, async () => {
+        try {
+            const d = await api('/scan-delete', { method: 'POST', body: { filters: f } });
+            if (d.success) {
+                showToast(d.message || 'Data berhasil dihapus', 'success');
+                closeModal('cleanupModal');
+                loadData(1);
+            } else {
+                setCleanPreview(d.message || 'Gagal menghapus.', true);
+                showToast(d.message || 'Gagal menghapus', 'error');
+            }
+        } catch (e) { showToast('Gagal menghapus', 'error'); }
+    });
+}
+
+function exportPrint() {
+    // Membuka tampilan laporan (sama seperti Cetak): view HTML siap cetak/simpan PDF
+    const params = new URLSearchParams();
+    const date = document.getElementById('filterDate').value;
+    const search = document.getElementById('filterSearch').value.trim();
+    const eksp = getMsValues('ekspedisi').join(',');
+    const jenis = getMsValues('jenis').join(',');
+    const operator = document.getElementById('filterOperator').value;
+    if (date) params.set('date', date);
+    if (search) params.set('search', search);
+    if (eksp) params.set('ekspedisi', eksp);
+    if (jenis) params.set('jenis', jenis);
+    if (operator) params.set('user_id', operator);
+    params.set('format', 'print');
+    openPrint('/api/export?' + params.toString());
+}
+function printData() {
+    exportPrint();
+}
+
+async function initOperatorFilter() {
+    const sel = document.getElementById('filterOperator');
+    if (!sel) return;
+    try {
+        const d = await api('/users');
+        if (!d.success) throw new Error(d.message);
+        const ops = (d.data || []).filter(u => u.role === 'operator');
+        allOperatorOptions = ops.map(u => ({ id: u.id, label: (u.nama || u.username) }));
+        sel.innerHTML = '<option value="">Semua Operator</option>' +
+            ops.map(u => `<option value="${u.id}">${escHtml(u.nama || u.username)}</option>`).join('');
+        sel.style.display = '';
+        const wrap = document.getElementById('operatorSearchWrap');
+        if (wrap) wrap.style.display = '';
+        document.getElementById('operatorSearch').value = '';
+        document.getElementById('operatorSearch').disabled = allOperatorOptions.length === 0;
+    } catch (e) {
+        console.warn('Gagal memuat operator filter', e);
+        sel.style.display = 'none';
+        const wrap = document.getElementById('operatorSearchWrap');
+        if (wrap) wrap.style.display = 'none';
+    }
+}
+
+function filterOperatorOptions() {
+    const q = (document.getElementById('operatorSearch').value || '').trim().toLowerCase();
+    const sel = document.getElementById('filterOperator');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">Semua Operator</option>' +
+        allOperatorOptions
+            .filter(o => !q || o.label.toLowerCase().includes(q))
+            .map(o => `<option value="${o.id}">${escHtml(o.label)}</option>`)
+            .join('');
+    sel.value = prev;
+}
+
+(function initDb() {
+    const params = new URLSearchParams(window.location.search);
+    const dateInput = document.getElementById('filterDate');
+    if (params.get('date')) dateInput.value = params.get('date');
+    else dateInput.value = todayString();
+    if (params.get('ekspedisi')) setMsValues('ekspedisi', params.get('ekspedisi').split(','));
+    if (params.get('jenis')) setMsValues('jenis', params.get('jenis').split(','));
+    if (params.get('user_id')) document.getElementById('filterOperator').value = params.get('user_id');
+})();
+
+(async function init() {
+    const user = await initApp();
+    if (!user) return;
+    document.getElementById('umName').textContent = user.nama;
+    document.getElementById('umRole').textContent = user.toko + ' • ' + user.role;
+    document.querySelector('.user-avatar-lg').textContent = (user.nama || '?').charAt(0).toUpperCase();
+    await applyDarkMode();
+    if (user.role === 'admin') {
+        await initOperatorFilter();
+        document.getElementById('cleanupBtn').style.display = '';
+    }
+    loadData(1);
+})();
+</script>
+</body>
+</html>

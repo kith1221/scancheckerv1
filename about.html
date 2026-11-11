@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Tentang">
+    <title>Tentang | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker · Tentang</div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="user-badge" id="userBadge">
+            <div class="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" style="font-size:.75rem;font-weight:600;color:var(--text-primary)">-</span>
+                <span class="user-role">-</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="user-menu" id="userMenu">
+    <div class="user-menu-header">
+        <div class="user-avatar-lg"></div>
+        <div>
+            <div class="user-menu-name" id="umName">-</div>
+            <div class="user-menu-role" id="umRole">-</div>
+        </div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <a href="/settings.html" class="user-menu-item">Pengaturan</a>
+    <a href="/users.html" class="user-menu-item" id="menuUsersWrap" style="display:none">Kelola Pengguna</a>
+    <button class="user-menu-item theme-toggle-row" id="darkModeToggle" title="Ganti tema">
+        <span class="theme-toggle-label"><span id="darkModeMark"></span> <span id="darkModeLabel">Mode Gelap</span></span>
+        <span class="theme-switch" id="darkModeSwitch"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item danger" id="logoutBtn">Keluar</button>
+</div>
+<div class="overlay" id="menuOverlay" style="display:none"></div>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <div style="text-align:center;padding:var(--space-xl) 0;animation:fadeInUp 0.3s ease">
+        <div style="width:80px;height:80px;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-md);box-shadow:var(--shadow-glow);animation:logoFloat 3s ease-in-out infinite">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div style="font-size:2.2rem;font-weight:800;font-family:var(--font-display);letter-spacing:0.01em;color:#C8102E">RankSports</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;font-weight:600">ScanChecker</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">Versi 2.0.0</div>
+        <div class="badge badge-primary" style="margin-top:var(--space-sm)">Sistem Scan &amp; Tracking Paket Ekspedisi</div>
+    </div>
+
+    <div class="card" style="margin-bottom:var(--space-md);animation:fadeInUp 0.35s ease 0.05s both">
+        <div class="section-title" style="margin-bottom:var(--space-md)"><span class="section-title-accent"></span>Fitur</div>
+        <div class="feature-list" id="featureList"></div>
+    </div>
+
+    <div class="card" style="animation:fadeInUp 0.4s ease 0.1s both">
+        <div class="section-title" style="margin-bottom:var(--space-md)"><span class="section-title-accent"></span>Teknologi</div>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-sm)" id="techList"></div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:var(--space-md);text-align:center">
+            &copy; 2026 ScanChecker v2.0 &mdash; Built with work
+        </div>
+    </div>
+
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="/js/app.js"></script>
+<script src="/js/ui.js"></script>
+<script>
+const FEATURES = [
+    ['📦', 'Scan Pengiriman & Retur', 'Input manual atau kamera QR/Barcode'],
+    ['🚚', '8 Ekspedisi', 'J&T, JNE, SiCepat, Pos, Ninja, AnterAja, SPX & lainnya'],
+    ['🔍', 'Auto-deteksi Ekspedisi', 'Deteksi otomatis dari prefix nomor resi'],
+    ['📊', 'Statistik Real-time', 'Counter per ekspedisi, total hari ini & bulan ini'],
+    ['💾', 'Export Data', 'Export ke CSV & Excel'],
+    ['👥', 'Multi-user', 'Role Admin & Operator dengan akses berbeda'],
+    ['🌙', 'Dark / Light Mode', 'Tema gelap dan terang yang bisa disesuaikan'],
+    ['🔔', 'Notifikasi Duplikat', 'Peringatan jika resi sudah pernah discan'],
+];
+const TECHS = ['Node.js', 'PostgreSQL', 'Vanilla JS', 'CSS Custom', 'html5-qrcode', 'Vercel'];
+
+document.getElementById('featureList').innerHTML = FEATURES.map(f => `
+    <div style="display:flex;align-items:flex-start;gap:var(--space-sm);margin-bottom:var(--space-sm);padding-bottom:var(--space-sm);border-bottom:1px solid var(--border)">
+        <span style="font-size:1.2rem;flex-shrink:0">${f[0]}</span>
+        <div>
+            <div style="font-weight:600;font-size:0.85rem">${f[1]}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${f[2]}</div>
+        </div>
+    </div>`).join('');
+document.getElementById('techList').innerHTML = TECHS.map(t =>
+    `<span class="badge badge-muted" style="font-size:0.8rem">${t}</span>`).join('');
+
+(async function init() {
+    const user = await initApp();
+    if (!user) return;
+    document.getElementById('umName').textContent = user.nama;
+    document.getElementById('umRole').textContent = user.toko + ' • ' + user.role;
+    document.querySelector('.user-avatar-lg').textContent = (user.nama || '?').charAt(0).toUpperCase();
+    await applyDarkMode();
+})();
+</script>
+</body>
+</html>

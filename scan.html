@@ -1,0 +1,839 @@
+﻿<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Scan">
+    <title>Scan | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker <span id="pageTitle">· Scan Barang</span></div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <button class="btn-icon" id="btnCam" onclick="toggleScanner()" title="Kamera">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+    </div>
+</nav>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:var(--space-md)" id="tokoLabel">-</div>
+
+    <div style="margin-bottom:var(--space-md)">
+        <div class="section-title" style="margin-bottom:var(--space-sm)">
+            <span class="section-title-accent"></span>
+            Masukkan No. Resi
+        </div>
+        <input type="text" id="resiInput" class="form-input" style="font-size:1.05rem;letter-spacing:.5px;text-transform:uppercase"
+               placeholder="Scan atau ketik nomor resi" autocomplete="off" autofocus>
+    </div>
+
+    <div id="courierPreview"></div>
+
+    <div id="returForm" style="display:none;margin-top:var(--space-md);padding:var(--space-md);background:var(--bg-elevated);border:1px solid var(--border);border-radius:14px">
+        <div class="section-title" style="margin-bottom:var(--space-sm)">
+            <span class="section-title-accent"></span>
+            Detail Retur
+        </div>
+        <div style="margin-bottom:var(--space-sm)">
+            <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">SKU</label>
+            <input type="text" id="returSku" class="form-input" placeholder="Kode SKU produk (opsional)" autocomplete="off">
+        </div>
+        <div style="margin-bottom:var(--space-sm)">
+            <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Nama Produk</label>
+            <input type="text" id="returProduk" class="form-input" placeholder="Nama produk yang diretur" autocomplete="off">
+        </div>
+        <div style="margin-bottom:var(--space-sm)">
+            <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Kondisi</label>
+            <div style="display:flex;gap:8px">
+                <button type="button" class="btn btn-sm cond-btn" data-cond="sesuai" onclick="pickKondisi('sesuai')">Sesuai</button>
+                <button type="button" class="btn btn-sm cond-btn" data-cond="tsesuai" onclick="pickKondisi('tsesuai')">Tidak Sesuai</button>
+            </div>
+            <input type="hidden" id="returKondisi" value="">
+        </div>
+        <div style="margin-bottom:var(--space-sm)">
+            <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Keterangan Kondisi</label>
+            <textarea id="returKeterangan" class="form-input" rows="2" placeholder="Contoh: rusak, salah ukuran, cacat, dll"></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-primary btn-block btn-lg ripple-btn" id="btnSubmit" onclick="submitScan()">
+        Simpan Scan
+    </button>
+
+    <div style="margin-top:var(--space-lg)">
+        <div class="section-title" style="margin-bottom:var(--space-sm)">
+            <span class="section-title-accent"></span>
+            Riwayat Scan
+        </div>
+        <div class="filter-bar" style="margin-bottom:var(--space-sm)">
+            <input type="date" id="todayFilterDate" class="form-input" style="flex:1;min-width:130px" onchange="selectTodayDate()">
+            <button class="btn btn-ghost btn-sm" onclick="setTodayFilter()">Hari Ini</button>
+        </div>
+        <div id="todayList">
+            <div style="color:var(--text-muted);font-size:.85rem">Memuat &hellip;</div>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<div id="cameraModal" class="camera-modal">
+    <div class="camera-card">
+        <div class="camera-modal-header">
+            <span class="camera-title">Pindai Kamera</span>
+            <button type="button" class="camera-close" onclick="stopScanner()" title="Tutup" aria-label="Tutup">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="camera-body">
+            <div id="qr-reader"></div>
+            <div id="scanOverlay" style="display:none;position:absolute;inset:0;pointer-events:none;">
+                <div id="scanFrame" style="position:absolute;left:12px;right:12px;top:50%;transform:translateY(-50%);height:64px;border:2px solid rgba(255,255,255,.9);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);"></div>
+            </div>
+        </div>
+        <div class="camera-hint">Arahkan barcode/QR ke tengah layar hingga otomatis terdeteksi</div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div class="modal-overlay" id="editModal">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">Ubah Data Scan</div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-sm)">
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">No. Resi</label>
+                <input type="text" id="editResi" class="form-input" style="text-transform:uppercase" autocomplete="off">
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Ekspedisi</label>
+                <select id="editEkspedisi" class="form-select"></select>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Jenis</label>
+                <select id="editJenis" class="form-select" onchange="setupEditReturForm(this.value)">
+                    <option value="pengiriman">Pengiriman</option>
+                    <option value="retur">Retur</option>
+                </select>
+            </div>
+            <div id="editReturWrap" style="display:none;flex-direction:column;gap:var(--space-sm)">
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">SKU</label>
+                    <input type="text" id="editSku" class="form-input" autocomplete="off">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Nama Produk</label>
+                    <input type="text" id="editProduk" class="form-input" autocomplete="off">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Kondisi</label>
+                    <div style="display:flex;gap:8px">
+                        <button type="button" class="btn btn-sm cond-btn" data-cond="sesuai" onclick="editKondisi('sesuai')">Sesuai</button>
+                        <button type="button" class="btn btn-sm cond-btn" data-cond="tsesuai" onclick="editKondisi('tsesuai')">Tidak Sesuai</button>
+                    </div>
+                    <input type="hidden" id="editKondisi" value="">
+                </div>
+                <div>
+                    <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Keterangan Kondisi</label>
+                    <textarea id="editKeterangan" class="form-input" rows="2"></textarea>
+                </div>
+            </div>
+            <div>
+                <label style="font-size:.8rem;color:var(--text-muted);display:block;margin-bottom:4px">Catatan</label>
+                <textarea id="editCatatan" class="form-input" rows="2"></textarea>
+            </div>
+        </div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-lg)">
+            <button class="btn btn-ghost btn-block" onclick="closeModal('editModal')">Batal</button>
+            <button class="btn btn-primary btn-block" onclick="saveEditScan()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<script>window.COURIER_PATTERNS_OVERRIDE = {};</script>
+<script src="/js/ui.js"></script>
+<script src="/js/courier.js"></script>
+<script src="/assets/html5-qrcode.min.js"></script>
+<script src="/js/app.js"></script>
+<script>
+let currentUser = null;
+let jenis = 'pengiriman';
+let scanner = null;
+let notifDuplikat = true;
+let todayPage = 1;
+let todayTotalPages = 1;
+const SCAN_PER_PAGE = 500;
+let todayFilterDate = '';
+
+// Prefill retur (diingat antar scan dalam satu sesi)
+let lastReturProduk = '';
+let lastReturKondisi = '';
+let lastReturKeterangan = '';
+let lastReturSku = '';
+
+const src = new URLSearchParams(window.location.search);
+jenis = src.get('jenis') === 'retur' ? 'retur' : 'pengiriman';
+document.getElementById('pageTitle').textContent = jenis === 'retur' ? '· Scan Retur' : '· Scan Pengiriman';
+
+// Tampilkan form detail retur hanya untuk mode retur
+(function initReturForm() {
+    const f = document.getElementById('returForm');
+    if (!f) return;
+    if (jenis !== 'retur') return;
+    f.style.display = 'block';
+    document.getElementById('returSku').value = lastReturSku;
+    document.getElementById('returProduk').value = lastReturProduk;
+    document.getElementById('returKeterangan').value = lastReturKeterangan;
+    if (lastReturKondisi) pickKondisi(lastReturKondisi);
+})();
+
+function pickKondisi(k) {
+    lastReturKondisi = k;
+    document.getElementById('returKondisi').value = k;
+    document.querySelectorAll('.cond-btn').forEach(b => {
+        b.classList.toggle('btn-primary', b.dataset.cond === k);
+        b.classList.toggle('btn-outline', b.dataset.cond !== k);
+    });
+}
+
+// ---------- AUDIO ----------
+let audioCtx = null;
+function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
+function tone(freq, startOffset, dur, type, vol) {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'square';
+    osc.frequency.value = freq;
+    const t0 = ctx.currentTime + (startOffset || 0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol || 0.9, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+}
+function playSuccessSound() {
+    tone(523.25, 0, 0.18, 'square', 0.9);
+    tone(659.25, 0.15, 0.18, 'square', 0.9);
+    tone(783.99, 0.3, 0.3, 'square', 0.9);
+}
+function playErrorSound() {
+    tone(196, 0, 0.25, 'square', 1.0);
+    tone(196, 0.28, 0.3, 'square', 1.0);
+}
+
+// ---------- COURIER PREVIEW ----------
+const resiInput = document.getElementById('resiInput');
+resiInput.addEventListener('input', () => {
+    const val = resiInput.value.trim();
+    const prev = document.getElementById('courierPreview');
+    if (!val || val.length < 5) { prev.style.display = 'none'; prev.innerHTML = ''; return; }
+    const c = detectCourier(val);
+    prev.style.display = 'block';
+    prev.innerHTML = `<div style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:12px;border:1px solid ${c.color}55;background:${c.color}15;color:${c.color}">
+        <span style="font-weight:600">${escHtml(c.name)}</span>
+    </div>`;
+});
+
+// ---------- SCANNER KAMERA ----------
+let scannerStarted = false;
+
+// Dukungan format: prioritas barcode 1D (CODE_128 dll) + QR.
+const SCAN_FORMATS = [
+    Html5QrcodeSupportedFormats.CODE_128,
+    Html5QrcodeSupportedFormats.CODE_39,
+    Html5QrcodeSupportedFormats.CODE_93,
+    Html5QrcodeSupportedFormats.CODE_25,
+    Html5QrcodeSupportedFormats.EAN_13,
+    Html5QrcodeSupportedFormats.EAN_8,
+    Html5QrcodeSupportedFormats.UPC_A,
+    Html5QrcodeSupportedFormats.UPC_E,
+    Html5QrcodeSupportedFormats.QR_CODE,
+];
+
+// Native BarcodeDetector bagus untuk 2D tapi sering TIDAK mendukung 1D
+// di Chrome desktop/Windows. Pakai decoder JS (ZXing) bila native tidak ada.
+function nativeDetects1D() {
+    try {
+        if (!('BarcodeDetector' in window)) return false;
+        const formats = window.BarcodeDetector.getSupportedFormats();
+        const oneD = ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8',
+            'upc_a', 'upc_e', 'codabar', 'itf', 'code_25'];
+        return Array.isArray(formats)
+            ? formats.some(f => oneD.includes(String(f).toLowerCase()))
+            : false;
+    } catch (e) {
+        return false;
+    }
+}
+
+async function listVideoDevices() {
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        return devices.filter(d => d.kind === 'videoinput');
+    } catch (e) { return []; }
+}
+
+// Pilih kamera: belakang -> depan -> pertama -> fallback environment.
+async function resolveCamera() {
+    let videos = [];
+    try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        videos = devices.filter(d => d.kind === 'videoinput');
+    } catch (e) { /* lanjut */ }
+
+    if (videos.length > 0) {
+        const rear  = videos.find(d => /back|environment|rear/i.test(d.label || ''));
+        const front = videos.find(d => /front|user|webcam/i.test(d.label || ''));
+        if (rear)  return { deviceId: { exact: rear.deviceId } };
+        if (front) return { deviceId: { exact: front.deviceId } };
+        return { deviceId: { exact: videos[0].deviceId } };
+    }
+    return { facingMode: 'environment' };
+}
+
+async function toggleScanner() {
+    if (scannerStarted) { stopScanner(); return; }
+    if (typeof Html5Qrcode === 'undefined') { showToast('Library kamera belum tersedia.', 'error'); return; }
+    openCameraModal();
+    try {
+        if (!scanner) scanner = new Html5Qrcode('qr-reader', { formatsToSupport: SCAN_FORMATS });
+
+        // Viewport LEBAR untuk barcode 1D (horizontal), bukan kotak persegi.
+        // qrbox sebagai FUNGSI: gunakan lebar penuh area scan dan tinggi tipis,
+        // sehingga library selalu membuat pita (bukan persegi) terlepas dari ukuran video.
+        const rootEl = document.getElementById('qr-reader');
+        const config = {
+            fps: 30,
+            qrbox: (vbWidth, vbHeight) => {
+                const base = Math.min(rootEl.clientWidth || vbWidth, vbWidth);
+                const w = Math.max(180, Math.min(base, 480));
+                return { width: w, height: Math.max(50, Math.round(w * 0.2)) };
+            },
+            experimentalFeatures: { useBarCodeDetectorIfSupported: nativeDetects1D() },
+        };
+
+        // PENTING: mulai kamera LANGSUNG tanpa await API lain di depannya, agar
+        // user gesture (klik) masih aktif dan browser mau memunculkan prompt izin kamera.
+        // Pakai facingMode environment dulu (paling umum di HP).
+        try {
+            await scanner.start({ facingMode: 'environment' }, config, onDecoded, () => {});
+        } catch (err) {
+            // Gagal: coba kamera spesifik (belakang -> depan -> pertama).
+            const camera = await resolveCamera();
+            await scanner.start(camera, config, onDecoded, () => {});
+        }
+        scannerStarted = true;
+        document.getElementById('btnCam').style.color = 'var(--primary)';
+        document.getElementById('scanOverlay').style.display = 'block';
+        } catch (err) {
+            const name = (err && err.name) || 'Unknown';
+            const msg = (err && err.message) ? err.message.split('\n')[0].slice(0, 120) : '';
+            console.error('[camera]', err);
+            let hint;
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                hint = 'Browser ini tidak mendukung kamera. Coba buka lewat HTTPS di Chrome/Safari.';
+            } else if (name === 'NotAllowedError') {
+                hint = 'Akses kamera ditolak. Izinkan kamera untuk situs ini di pengaturan browser, lalu coba lagi.';
+            } else if (name === 'NotFoundError') {
+                hint = 'Kamera tidak ditemukan di perangkat ini.';
+            } else if (name === 'NotReadableError') {
+                hint = 'Kamera sedang dipakai aplikasi lain. Tutup aplikasi kamera lain lalu coba lagi.';
+            } else if (name === 'OverconstrainedError') {
+                hint = 'Format kamera tidak didukung.';
+            } else {
+                hint = `Kamera gagal dibuka (${name}). ${msg}`;
+            }
+            showToast(hint, 'error');
+            if (scanner) { try { await scanner.stop(); } catch (e) {} }
+            document.getElementById('scanOverlay').style.display = 'none';
+            closeCameraModal();
+        }
+}
+
+function openCameraModal() {
+    document.getElementById('cameraModal').classList.add('open');
+    document.body.classList.add('modal-open');
+}
+function closeCameraModal() {
+    document.getElementById('cameraModal').classList.remove('open');
+    document.body.classList.remove('modal-open');
+}
+
+function onDecoded(decodedText) {
+    resiInput.value = normalizeResi(decodedText);
+    resiInput.dispatchEvent(new Event('input', { bubbles: true }));
+    submitScan(true);
+}
+
+function stopScanner() {
+    if (scannerStarted && scanner) {
+        scanner.stop().then(() => {
+            scanner.clear().catch(() => {});
+            scannerStarted = false;
+            document.getElementById('btnCam').style.color = '';
+            document.getElementById('scanOverlay').style.display = 'none';
+            closeCameraModal();
+        }).catch(() => {
+            scannerStarted = false;
+            document.getElementById('scanOverlay').style.display = 'none';
+            closeCameraModal();
+        });
+    } else {
+        closeCameraModal();
+    }
+}
+
+// ---------- SCAN ----------
+let scanningLock = false;
+
+async function submitScan(fromScanner) {
+    if (scanningLock) return;
+    const resi = resiInput.value.trim();
+    if (!resi) { showToast('Masukkan nomor resi dulu', 'warning'); resiInput.focus(); return; }
+    if (resi.length < 5) { showToast('No. resi minimal 5 karakter', 'warning'); resiInput.focus(); return; }
+
+    const c = detectCourier(resi);
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    scanningLock = true;
+
+    const release = () => { btn.disabled = false; scanningLock = false; };
+    const resetInput = () => { resiInput.value = ''; resiInput.focus(); };
+
+    try {
+        // cek duplikat — SELALU dijalankan (mencegah resi terscan 2x).
+        const dup = await api('/scan-check-duplicate?resi=' + encodeURIComponent(resi) + '&date=' + todayString());
+        if (dup.is_duplicate) {
+            if (!fromScanner) {
+                const lanjut = confirm(`⚠️ No. resi "${resi}" sudah pernah discan hari ini (${dup.scan_time}). Lanjutkan?`);
+                if (!lanjut) {
+                    playErrorSound();
+                    resetInput();
+                    release();
+                    return;
+                }
+                // Jika dipaksa lanjut, server tetap menolak duplikat (lihat scan-add.js).
+            } else {
+                showToast('Duplikat! sudah discan hari ini (' + dup.scan_time + ')', 'warning');
+                playErrorSound();
+                resetInput();
+                release();
+                return;
+            }
+        }
+
+        const returData = {};
+        if (jenis === 'retur') {
+            const produk = (document.getElementById('returProduk').value || '').trim();
+            const kondisi = document.getElementById('returKondisi').value;
+            const keterangan = (document.getElementById('returKeterangan').value || '').trim();
+            if (!produk) {
+                playErrorSound();
+                showToast('Nama produk retur wajib diisi', 'warning');
+                document.getElementById('returProduk').focus();
+                release();
+                return;
+            }
+            if (!kondisi) {
+                playErrorSound();
+                showToast('Pilih kondisi retur (Sesuai / Tidak Sesuai)', 'warning');
+                release();
+                return;
+            }
+            returData.produk_retur = produk;
+            returData.kondisi_retur = kondisi === 'sesuai' ? 'sesuai' : 'tidak sesuai';
+            returData.keterangan_retur = keterangan;
+            returData.sku_retur = (document.getElementById('returSku').value || '').trim();
+        }
+
+        const res = await api('/scan-add', {
+            method: 'POST',
+            body: { no_resi: resi, ekspedisi: c.name, ekspedisi_kode: c.code, jenis: jenis, ...returData }
+        });
+        if (res.is_duplicate) {
+            playErrorSound();
+            showToast('Duplikat! sudah discan hari ini (' + res.scan_time + ')', 'warning');
+            resetInput();
+            release();
+            return;
+        }
+        if (res.success) {
+            if (jenis === 'retur') {
+                lastReturProduk = returData.produk_retur;
+                lastReturKondisi = document.getElementById('returKondisi').value;
+                lastReturKeterangan = returData.keterangan_retur;
+                lastReturSku = returData.sku_retur;
+                document.getElementById('returSku').value = '';
+                document.getElementById('returProduk').value = '';
+                document.getElementById('returKeterangan').value = '';
+                document.getElementById('returKondisi').value = '';
+                document.querySelectorAll('.cond-btn').forEach(b => {
+                    b.classList.add('btn-outline');
+                    b.classList.remove('btn-primary');
+                });
+            }
+            playSuccessSound();
+            showToast('✓ ' + resi + ' berhasil discan (' + c.name + ')', 'success');
+            resetInput();
+            loadToday(1);
+        } else {
+            playErrorSound();
+            showToast(res.message || 'Gagal menyimpan', 'error');
+        }
+    } catch (err) {
+        playErrorSound();
+        showToast(err.message || 'Gagal menyimpan', 'error');
+    }
+    release();
+}
+
+function courierMeta(code) {
+    return Object.values(COURIERS).find(x => x.code === code)
+        || { name: code || 'Lainnya', class: 'exp-other', color: '#64748B' };
+}
+
+function toggleExpGroup(header) {
+    const body = header.parentElement.querySelector('.today-exp-body');
+    const chevron = header.querySelector('.exp-chevron');
+    if (!body) return;
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+    } else {
+        body.style.display = 'none';
+        if (chevron) chevron.style.transform = '';
+    }
+}
+
+function selectTodayDate() {
+    todayFilterDate = document.getElementById('todayFilterDate').value;
+    loadToday(1);
+}
+function setTodayFilter() {
+    todayFilterDate = '';
+    const inp = document.getElementById('todayFilterDate');
+    if (inp) inp.value = todayString();
+    loadToday(1);
+}
+
+async function loadToday(page = 1) {
+    const el = document.getElementById('todayList');
+    // Tanggal kosong = "hari ini" (server memakai WIB) -> sinkron dengan scan-add
+    const dp = todayFilterDate ? '&date=' + todayFilterDate : '';
+    try {
+        const d = await api('/scan-list?jenis=' + jenis + dp + '&page=' + page + '&per_page=' + SCAN_PER_PAGE);
+        if (!d.success) throw new Error(d.message);
+        const scans = d.data.scans || [];
+        const total = d.data.total || 0;
+        const theDate = d.data.today || todayString();
+        if (!todayFilterDate) {
+            todayFilterDate = theDate;
+            const inp = document.getElementById('todayFilterDate');
+            if (inp) inp.value = theDate;
+        }
+        todayPage = page;
+        todayTotalPages = Math.max(1, Math.ceil(total / SCAN_PER_PAGE));
+        todayScansMap = {};
+        scans.forEach(s => { todayScansMap[s.id] = s; });
+        if (scans.length === 0) {
+            el.innerHTML = `<div style="color:var(--text-muted);font-size:.85rem">Belum ada scan ${jenis === 'retur' ? 'retur' : 'pengiriman'} pada ${formatDate(theDate)}.</div>`;
+            return;
+        }
+        const jenisLabel = jenis === 'retur' ? 'retur' : 'pengiriman';
+        const dateLabel = todayFilterDate === todayString() ? 'hari ini' : formatDate(todayFilterDate);
+
+        // Kelompokkan scan per ekspedisi
+        const groups = {};
+        scans.forEach(s => {
+            const key = s.ekspedisi_kode || 'OTHER';
+            (groups[key] = groups[key] || []).push(s);
+        });
+        const groupOrder = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+
+        const itemHtml = (s, idx) => {
+            const returDetail = s.jenis === 'retur'
+                ? `<div style="font-size:.72rem;color:var(--text-secondary);margin-top:2px">
+                      ${s.sku_retur ? 'SKU: ' + escHtml(s.sku_retur) + ' · ' : ''}${escHtml(s.produk_retur || '-')} · ${s.kondisi_retur === 'sesuai' ? 'Sesuai' : (s.kondisi_retur ? 'Tidak Sesuai' : '-')}${s.keterangan_retur ? ' · ' + escHtml(s.keterangan_retur) : ''}
+                   </div>` : '';
+            return `<div class="scan-item ${s.jenis === 'retur' ? 'retur' : ''}" id="scan-item-${s.id}" onclick="selectScanItem(this)">
+                <div style="display:flex;align-items:center;gap:var(--space-md)">
+                    <span class="scan-item-index">${idx}</span>
+                    <div>
+                        <div class="scan-item-no">${escHtml(s.no_resi)}</div>
+                        <div class="scan-item-meta">
+                            ${courierBadge(s.ekspedisi_kode)}
+                            ${s.jenis === 'retur' ? '<span class="badge badge-warning">RETUR</span>' : ''}
+                            <span style="font-size:.72rem;color:var(--text-muted)">oleh ${escHtml(s.username || '')}</span>
+                        </div>
+                        ${returDetail}
+                    </div>
+                </div>
+                <div class="scan-item-actions">
+                    <span class="scan-item-time">${formatTime(s.scan_time)}</span>
+                    <button class="btn-icon" onclick="event.stopPropagation();deleteScan(${s.id})" title="Hapus" style="color:var(--danger)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </button>
+                </div>
+            </div>`;
+        };
+
+        let html = `<div style="margin-bottom:var(--space-sm);font-size:.85rem"><b>${total}</b> ${jenisLabel} ${dateLabel}</div>`;
+        for (const key of groupOrder) {
+            const list = groups[key];
+            const meta = courierMeta(key);
+            html += `<div class="today-exp-group" data-exp="${key}" style="margin-bottom:var(--space-md)">
+                <div class="today-exp-header" onclick="toggleExpGroup(this)" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:${meta.color}14;border:1px solid ${meta.color}33;cursor:pointer;user-select:none">
+                    <span style="display:flex;align-items:center;gap:6px;font-weight:700;font-size:.85rem;color:${meta.color}">
+                        ${escHtml(meta.name)}
+                        <svg class="exp-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s ease"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </span>
+                    <div class="today-exp-actions" onclick="event.stopPropagation()">
+                        <span style="font-weight:800;font-size:1.05rem;color:${meta.color}">${list.length}</span>
+                        <button type="button" class="exp-act-btn" data-need="select" onclick="editGroupScan(this)" title="Edit resi terpilih">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Edit
+                        </button>
+                        <button type="button" class="exp-act-btn" onclick="exportGroupScan(this)" title="Export PDF data ekspedisi ini">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Export
+                        </button>
+                        <button type="button" class="exp-act-btn danger" data-need="select" onclick="deleteGroupScan(this)" title="Hapus resi terpilih">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        Hapus
+                        </button>
+                    </div>
+                </div>
+                <div class="today-exp-body" style="display:none;margin-top:8px">`;
+            let groupIdx = 0;
+            list.forEach((s) => {
+                groupIdx++;
+                html += itemHtml(s, groupIdx);
+            });
+            html += '</div></div>';
+        }
+        html += renderTodayPagination();
+        el.innerHTML = html;
+        refreshGroupActions();
+    } catch (err) {
+        el.innerHTML = `<div style="color:var(--danger);font-size:.85rem">Gagal memuat.</div>`;
+    }
+}
+
+function renderTodayPagination() {
+    if (todayTotalPages <= 1) return '';
+    const btn = (p, label, disabled, active) =>
+        `<button class="page-btn ${active ? 'active' : ''}" ${disabled ? 'disabled' : ''} onclick="loadToday(${p})" ${disabled ? 'style="opacity:.4"' : ''}>${label}</button>`;
+    let inner = `${btn(todayPage - 1, '&#8249;', todayPage <= 1, false)} `;
+    for (let i = 1; i <= todayTotalPages; i++) {
+        const range = 2;
+        if (i === 1 || i === todayTotalPages || (i >= todayPage - range && i <= todayPage + range)) {
+            inner += `${btn(i, i, false, i === todayPage)} `;
+        } else if (i === todayPage - range - 1 || i === todayPage + range + 1) {
+            inner += `<span style="color:var(--text-muted);padding:0 4px">&hellip;</span> `;
+        }
+    }
+    inner += `${btn(todayPage + 1, '&#8250;', todayPage >= todayTotalPages, false)}`;
+    return `<div class="pagination" style="justify-content:center;margin-top:var(--space-md)">${inner}</div>`;
+}
+
+async function deleteScan(id) {
+    confirmDialog('Hapus scan ini?', async () => {
+        try {
+            const d = await api('/scan-delete', { method: 'POST', body: { id } });
+            if (d.success) {
+                showToast('Scan berhasil dihapus', 'success');
+                loadToday(1);
+            } else {
+                showToast(d.message || 'Gagal menghapus', 'error');
+            }
+        } catch (e) {
+            showToast('Gagal menghapus', 'error');
+        }
+    });
+}
+
+// ===== Aksi per ekspedisi (Edit/Export/Hapus resi terpilih) =====
+let _editingId = null;
+let todayScansMap = {};
+
+function selectScanItem(el) {
+    const group = el.closest('.today-exp-group');
+    const was = el.classList.contains('selected');
+    if (group) group.querySelectorAll('.scan-item.selected').forEach(i => i.classList.remove('selected'));
+    if (!was) el.classList.add('selected');
+    refreshGroupActions();
+}
+
+function refreshGroupActions() {
+    document.querySelectorAll('.today-exp-group').forEach(g => {
+        const has = !!g.querySelector('.scan-item.selected');
+        g.querySelectorAll('.exp-act-btn[data-need="select"]').forEach(b => { b.disabled = !has; });
+    });
+}
+
+function getSelectedScan(el) {
+    const g = el.closest('.today-exp-group');
+    const item = g && g.querySelector('.scan-item.selected');
+    if (!item) { showToast('Pilih satu resi di grup ini dulu', 'warning'); return null; }
+    return todayScansMap[item.id.replace('scan-item-', '')] || null;
+}
+
+function editGroupScan(btn) {
+    const s = getSelectedScan(btn);
+    if (s) editScanModal(s.id);
+}
+function exportGroupScan(btn) {
+    const g = btn.closest('.today-exp-group');
+    const code = g && g.dataset.exp;
+    if (!code) return;
+    const date = todayFilterDate || todayString();
+    const params = new URLSearchParams();
+    params.set('format', 'print');
+    if (date) params.set('date', date);
+    params.set('ekspedisi', code);
+    if (jenis) params.set('jenis', jenis);
+    openPrint('/api/export?' + params.toString());
+}
+function deleteGroupScan(btn) {
+    const s = getSelectedScan(btn);
+    if (s) deleteScan(s.id);
+}
+
+function scanCourierName(code) {
+    const c = getAllCouriers().find(x => x.code === code);
+    return c ? c.name : (code === 'OTHER' ? 'Lainnya' : code);
+}
+function editKondisi(k) {
+    document.getElementById('editKondisi').value = k;
+    document.querySelectorAll('#editModal .cond-btn').forEach(b => {
+        b.classList.toggle('btn-primary', b.dataset.cond === k);
+        b.classList.toggle('btn-outline', b.dataset.cond !== k);
+    });
+}
+function fillEkspedisiSelect(selectedCode) {
+    const sel = document.getElementById('editEkspedisi');
+    const all = getAllCouriers();
+    sel.innerHTML = all.map(c =>
+        `<option value="${c.code}" ${c.code === selectedCode ? 'selected' : ''}>${c.name}</option>`
+    ).join('') + `<option value="OTHER" ${selectedCode === 'OTHER' ? 'selected' : ''}>Lainnya</option>`;
+}
+function setupEditReturForm(jenis) {
+    const wrap = document.getElementById('editReturWrap');
+    wrap.style.display = jenis === 'retur' ? 'flex' : 'none';
+}
+async function editScanModal(id) {
+    try {
+        const d = await api('/scan-list?id=' + id);
+        if (!d.success) throw new Error(d.message);
+        _editingId = id;
+        const s = d.data;
+        document.getElementById('editResi').value = s.no_resi || '';
+        fillEkspedisiSelect(s.ekspedisi_kode || 'OTHER');
+        document.getElementById('editJenis').value = s.jenis === 'retur' ? 'retur' : 'pengiriman';
+        document.getElementById('editSku').value = s.sku_retur || '';
+        document.getElementById('editProduk').value = s.produk_retur || '';
+        document.getElementById('editKeterangan').value = s.keterangan_retur || '';
+        document.getElementById('editCatatan').value = s.catatan || '';
+        if (s.jenis === 'retur' && s.kondisi_retur) {
+            editKondisi(s.kondisi_retur === 'sesuai' ? 'sesuai' : 'tsesuai');
+        } else {
+            document.getElementById('editKondisi').value = '';
+            document.querySelectorAll('#editModal .cond-btn').forEach(b => {
+                b.classList.add('btn-outline');
+                b.classList.remove('btn-primary');
+            });
+        }
+        setupEditReturForm(s.jenis === 'retur' ? 'retur' : 'pengiriman');
+        openModal('editModal');
+    } catch (err) {
+        showToast(err.message || 'Gagal memuat data untuk diubah', 'error');
+    }
+}
+function saveEditScan() {
+    const id = _editingId;
+    if (!id) return;
+    const resi = document.getElementById('editResi').value.trim();
+    if (!resi || resi.length < 5) { showToast('No. resi minimal 5 karakter', 'warning'); return; }
+    const jenis = document.getElementById('editJenis').value;
+    const body = {
+        id,
+        no_resi: resi.toUpperCase(),
+        ekspedisi: scanCourierName(document.getElementById('editEkspedisi').value),
+        ekspedisi_kode: document.getElementById('editEkspedisi').value,
+        jenis,
+        catatan: document.getElementById('editCatatan').value.trim(),
+    };
+    if (jenis === 'retur') {
+        const produk = document.getElementById('editProduk').value.trim();
+        const kondisi = document.getElementById('editKondisi').value;
+        if (!produk) { showToast('Nama produk retur wajib diisi', 'warning'); return; }
+        if (!kondisi) { showToast('Pilih kondisi retur (Sesuai / Tidak Sesuai)', 'warning'); return; }
+        body.produk_retur = produk;
+        body.kondisi_retur = kondisi === 'sesuai' ? 'sesuai' : 'tidak sesuai';
+        body.keterangan_retur = document.getElementById('editKeterangan').value.trim();
+        body.sku_retur = document.getElementById('editSku').value.trim();
+    }
+    api('/scan-list', { method: 'POST', body })
+        .then(d => {
+            if (d.success) {
+                showToast(d.message || 'Data berhasil diperbarui', 'success');
+                closeModal('editModal');
+                loadToday(1);
+            } else {
+                showToast(d.message || 'Gagal memperbarui', 'error');
+            }
+        })
+        .catch(() => showToast('Gagal memperbarui', 'error'));
+}
+
+// KIRIM via tombol Enter
+resiInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submitScan(); } });
+
+(async function init() {
+    currentUser = await initApp();
+    if (!currentUser) return;
+    document.getElementById('tokoLabel').textContent = currentUser.toko;
+    // 'todayFilterDate' sengaja dikosongkan: server memakai 'hari ini' WIB agar sinkron
+    loadToday(1);
+    const s = await api('/settings').catch(() => null);
+    if (s && s.success) {
+        notifDuplikat = (s.data.notif_duplikat || '1') === '1';
+        // Terapkan override pola resi ekspedisi milik user
+        try {
+            const ov = JSON.parse(s.data.courier_patterns || '{}');
+            if (ov && window.applyCourierPatterns) window.applyCourierPatterns(ov);
+        } catch (e) {}
+    }
+    resiInput.focus();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Feedback">
+    <title>Feedback | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker · Feedback</div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="user-badge" id="userBadge">
+            <div class="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" style="font-size:.75rem;font-weight:600;color:var(--text-primary)">-</span>
+                <span class="user-role">-</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="user-menu" id="userMenu">
+    <div class="user-menu-header">
+        <div class="user-avatar-lg"></div>
+        <div>
+            <div class="user-menu-name" id="umName">-</div>
+            <div class="user-menu-role" id="umRole">-</div>
+        </div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <a href="/settings.html" class="user-menu-item">Pengaturan</a>
+    <a href="/users.html" class="user-menu-item" id="menuUsersWrap" style="display:none">Kelola Pengguna</a>
+    <button class="user-menu-item theme-toggle-row" id="darkModeToggle" title="Ganti tema">
+        <span class="theme-toggle-label"><span id="darkModeMark"></span> <span id="darkModeLabel">Mode Gelap</span></span>
+        <span class="theme-switch" id="darkModeSwitch"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item danger" id="logoutBtn">Keluar</button>
+</div>
+<div class="overlay" id="menuOverlay" style="display:none"></div>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <div class="card" style="margin-bottom:var(--space-lg);animation:fadeInUp 0.3s ease">
+        <div class="section-title" style="margin-bottom:var(--space-md)">
+            <span class="section-title-accent"></span>
+            Kirim Feedback
+        </div>
+        <form id="feedbackForm">
+            <div class="form-group">
+                <label class="form-label">Judul</label>
+                <input type="text" id="fbJudul" class="form-input" placeholder="Singkat dan jelas" required maxlength="200">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pesan</label>
+                <textarea id="fbPesan" class="form-input" rows="4" placeholder="Tulis saran, laporan bug, atau pertanyaan..." required style="resize:vertical"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Kirim Feedback</button>
+        </form>
+    </div>
+
+    <div id="fbHistoryWrap" style="display:none">
+        <div class="section-title" style="margin-bottom:var(--space-sm)">
+            <span class="section-title-accent"></span>
+            Riwayat Feedback
+        </div>
+        <div id="fbHistory" style="display:flex;flex-direction:column;gap:var(--space-sm)"></div>
+    </div>
+
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="/js/app.js"></script>
+<script src="/js/ui.js"></script>
+<script>
+document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const judul = document.getElementById('fbJudul').value.trim();
+    const pesan = document.getElementById('fbPesan').value.trim();
+    if (!judul || !pesan) { showToast('Mohon lengkapi judul dan pesan.', 'warning'); return; }
+    const d = await api('/feedback', { method: 'POST', body: { judul, pesan } });
+    if (d.success) { showToast('Feedback berhasil dikirim. Terima kasih!', 'success'); e.target.reset(); loadHistory(); }
+    else showToast(d.message || 'Gagal mengirim', 'error');
+});
+
+async function loadHistory() {
+    const wrap = document.getElementById('fbHistory');
+    const section = document.getElementById('fbHistoryWrap');
+    try {
+        const d = await api('/feedback');
+        if (!d.success || !d.data || d.data.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        wrap.innerHTML = d.data.map(f => `
+            <div class="card" >
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+                    <div style="font-weight:600;font-size:0.88rem">${escHtml(f.judul)}</div>
+                    <span class="badge ${f.status === 'pending' ? 'badge-warning' : 'badge-success'}" style="flex-shrink:0;margin-left:8px">${f.status === 'pending' ? 'Pending' : 'Selesai'}</span>
+                </div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;white-space:pre-wrap">${escHtml(f.pesan)}</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px">${formatDate(f.created_at)} ${formatTime(f.created_at)}</div>
+            </div>`).join('');
+    } catch (e) { section.style.display = 'none'; }
+}
+
+(async function init() {
+    const user = await initApp();
+    if (!user) return;
+    document.getElementById('umName').textContent = user.nama;
+    document.getElementById('umRole').textContent = user.toko + ' • ' + user.role;
+    document.querySelector('.user-avatar-lg').textContent = (user.nama || '?').charAt(0).toUpperCase();
+    await applyDarkMode();
+    loadHistory();
+})();
+</script>
+</body>
+</html>

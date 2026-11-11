@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="ScanChecker - Laporan Grafik">
+    <title>Laporan Grafik | ScanChecker</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+    <meta name="theme-color" content="#C8102E">
+    <style>
+        .c-num { text-align: right; white-space: nowrap; }
+        tr.total td { background: var(--bg-card-hover); font-weight: 700; }
+    </style>
+</head>
+<body class="light-mode">
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a href="/" class="btn-icon" aria-label="Kembali">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+    </div>
+    <div class="navbar-center">
+        <div class="navbar-brand navbar-brand-center">
+            <div class="navbar-brand-name">RankSports</div>
+            <div class="navbar-brand-sub">ScanChecker · Laporan</div>
+        </div>
+    </div>
+    <div class="navbar-right">
+        <div class="user-badge" id="userBadge">
+            <div class="user-avatar">?</div>
+            <div class="user-info">
+                <span class="user-name" style="font-size:.75rem;font-weight:600;color:var(--text-primary)">-</span>
+                <span class="user-role">-</span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="user-menu" id="userMenu">
+    <div class="user-menu-header">
+        <div class="user-avatar-lg"></div>
+        <div>
+            <div class="user-menu-name" id="umName">-</div>
+            <div class="user-menu-role" id="umRole">-</div>
+        </div>
+    </div>
+    <div class="user-menu-divider"></div>
+    <a href="/settings.html" class="user-menu-item">Pengaturan</a>
+    <a href="/users.html" class="user-menu-item">Kelola Pengguna</a>
+    <button class="user-menu-item theme-toggle-row" id="darkModeToggle" title="Ganti tema">
+        <span class="theme-toggle-label"><span id="darkModeMark"></span> <span id="darkModeLabel">Mode Gelap</span></span>
+        <span class="theme-switch" id="darkModeSwitch"><span class="theme-switch-thumb"></span></span>
+    </button>
+    <div class="user-menu-divider"></div>
+    <button class="user-menu-item danger" id="logoutBtn">Keluar</button>
+</div>
+<div class="overlay" id="menuOverlay" style="display:none"></div>
+
+<main class="main-content">
+<div class="page-container page-enter">
+
+    <div class="section-title">
+        <span class="section-title-accent"></span>
+        Laporan Grafik
+    </div>
+    <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:var(--space-md)">Rekap traffic scan sesuai rentang tanggal (khusus admin)</div>
+
+    <div class="card" style="padding:var(--space-md);margin-bottom:var(--space-md)">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px">
+            <button class="btn btn-outline btn-sm" onclick="setQuick(7)" style="color:var(--text-secondary);border-color:var(--border)">7 Hari</button>
+            <button class="btn btn-outline btn-sm" onclick="setQuick(30)" style="color:var(--text-secondary);border-color:var(--border)">30 Hari</button>
+            <button class="btn btn-outline btn-sm" onclick="setQuick(-1)" style="color:var(--text-secondary);border-color:var(--border)">Bulan Ini</button>
+            <button class="btn btn-outline btn-sm" onclick="setQuick(0)" style="color:var(--text-secondary);border-color:var(--border)">Semua</button>
+            <span style="flex:1"></span>
+            <label class="form-label" style="margin:0 4px 0 0">Dari</label>
+            <input type="date" id="fromDate" class="form-input" style="width:auto">
+            <label class="form-label" style="margin:0 4px 0 6px">Sampai</label>
+            <input type="date" id="toDate" class="form-input" style="width:auto">
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm ripple-btn" onclick="loadReport()">Tampilkan</button>
+            <button class="btn btn-outline btn-sm" onclick="exportReportPdf()" style="color:#dc2626;border-color:#dc2626">Export PDF</button>
+            <button class="btn btn-outline btn-sm" onclick="exportReportCsv()" style="color:#1d7a3c;border-color:#1d7a3c">Export CSV</button>
+            <span id="reportKeterangan" style="font-size:.78rem;color:var(--text-muted)"></span>
+        </div>
+    </div>
+
+    <div id="reportBody">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card" style="height:200px"></div>
+    </div>
+
+</div>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<template id="tplHbar">
+    <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;gap:8px;font-size:.78rem;margin-bottom:4px">
+            <span style="font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
+            <span style="color:var(--text-muted);white-space:nowrap"></span>
+        </div>
+        <div style="display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--bg-elevated);border:1px solid var(--border)">
+            <div class="seg" style="height:100%;background:#C8102E"></div>
+            <div class="seg seg2" style="height:100%;background:#8E1B2E"></div>
+        </div>
+    </div>
+</template>
+
+<script src="/js/app.js"></script>
+<script src="/js/ui.js"></script>
+<script>
+const K = {
+    primary: '#C8102E',
+    darkRed: '#8E1B2E',
+    pengiriman: '#C8102E',
+    retur: '#8E1B2E',
+    blue: '#2563eb',
+    green: '#1d7a3c',
+    amber: '#d97706',
+    textMuted: 'var(--text-muted)',
+};
+let currentUser = null;
+let lastReport = null;
+
+function fmtNum(n) {
+    return (n || 0).toLocaleString('id-ID');
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function dateStr(offsetDays) {
+    const d = new Date(Date.now() + offsetDays * 86400000);
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function hmm(ds) {
+    if (!ds) return '-';
+    const [y, m, d] = ds.split('-');
+    return `${d}/${m}/${y}`;
+}
+
+function setQuick(kind) {
+    const today = new Date();
+    const fmt = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    if (kind === 0) {
+        document.getElementById('fromDate').value = '';
+        document.getElementById('toDate').value = '';
+    } else if (kind === -1) {
+        document.getElementById('fromDate').value = fmt(new Date(today.getFullYear(), today.getMonth(), 1));
+        document.getElementById('toDate').value = fmt(today);
+    } else {
+        document.getElementById('fromDate').value = dateStr(-(kind - 1));
+        document.getElementById('toDate').value = fmt(today);
+    }
+    loadReport();
+}
+
+function sectionTitle(txt) {
+    return `<div class="section-title" style="margin-top:6px"><span class="section-title-accent"></span>${escHtml(txt)}</div>`;
+}
+
+function cardOpen(title, extraHtml) {
+    return `<div class="card" style="padding:var(--space-md);margin-bottom:var(--space-md);animation:fadeInUp .3s ease">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700;font-size:.92rem;color:var(--text-primary)">${escHtml(title)}</div>
+            ${extraHtml || ''}
+        </div>`;
+}
+function cardClose() { return `</div>`; }
+
+function hbarRow(label, value, totalKirim, totalRetur, widthAll) {
+    const el = document.getElementById('tplHbar').content.cloneNode(true);
+    const spans = el.querySelectorAll('span');
+    const labelEl = spans[0];
+    const rightEl = spans[1];
+    const sega = el.querySelector('.seg');
+    const segb = el.querySelector('.seg.seg2');
+    const track = el.querySelector('div[style*="display:flex;height:16px"]');
+    labelEl.textContent = label;
+    const t1 = totalKirim || 0;
+    const t2 = totalRetur || 0;
+    const p1 = widthAll > 0 ? Math.max(1.5, (t1 / widthAll) * 100) : 0;
+    const p2 = widthAll > 0 ? Math.max(1.5, (t2 / widthAll) * 100) : 0;
+    if (t1 > 0) { sega.style.width = p1 + '%'; sega.title = 'Pengiriman: ' + t1; } else sega.style.display = 'none';
+    if (t2 > 0) { segb.style.width = p2 + '%'; segb.title = 'Retur: ' + t2; } else segb.style.display = 'none';
+    if (t1 === 0 && t2 === 0) { track.style.display = 'none'; }
+    rightEl.textContent = fmtNum(value) + (t1 > 0 ? ' · ' + fmtNum(t1) + ' kirim' : '') + (t2 > 0 ? ' · ' + fmtNum(t2) + ' retur' : '');
+    return el;
+}
+
+function legend() {
+    return `<div style="display:flex;gap:12px;font-size:.72rem;color:var(--text-muted);margin-bottom:10px">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#C8102E;margin-right:4px"></span>Pengiriman</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#8E1B2E;margin-right:4px"></span>Retur</span>
+    </div>`;
+}
+
+function renderHbars(containerId, items, labelFn, max) {
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+    if (!items || items.length === 0) {
+        c.innerHTML = `<div class="empty-state" style="padding:18px"><p>Tidak ada data di rentang ini</p></div>`;
+        return;
+    }
+    const frag = document.createDocumentFragment();
+    items.forEach(it => {
+        const row = hbarRow(labelFn(it), it.total, it.pengiriman || 0, it.retur || 0, max || it.total || 0);
+        frag.appendChild(row);
+    });
+    c.appendChild(frag);
+}
+
+function renderVbars(containerId, items, labelFn, max) {
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+    if (!items || items.length === 0) {
+        c.innerHTML = `<div class="empty-state" style="padding:18px"><p>Tidak ada data di rentang ini</p></div>`;
+        return;
+    }
+    const m = max || Math.max(...items.map(i => i.total), 1);
+    const rows = items.map(it => {
+        const pct = m > 0 ? Math.max(4, (it.total / m) * 100) : 0;
+        return `<div style="flex:0 0 auto;width:44px;display:flex;flex-direction:column;align-items:center;gap:4px">
+            <span style="font-size:.68rem;font-weight:700;color:var(--text-primary)">${fmtNum(it.total)}</span>
+            <div style="width:26px;height:${pct}px;border-radius:6px 6px 2px 2px;background:#C8102E;min-height:3px" title="${escHtml(labelFn(it))}: ${it.total}"></div>
+            <span style="font-size:.62rem;color:var(--text-muted);white-space:nowrap">${escHtml(labelFn(it))}</span>
+        </div>`;
+    }).join('');
+    c.innerHTML = `<div style="display:flex;gap:8px;align-items:flex-end;height:168px;overflow-x:auto;padding:2px">${rows}</div>`;
+}
+
+function renderTable(wrapId, head, rowsHtml) {
+    const w = document.getElementById(wrapId);
+    if (!w) return;
+    if (!rowsHtml) { w.innerHTML = `<div class="empty-state" style="padding:18px"><p>Tidak ada data</p></div>`; return; }
+    w.innerHTML = `<div style="overflow-x:auto"><table class="table" style="min-width:100%">
+        <thead><tr>${head.map(h => `<th>${escHtml(h)}</th>`).join('')}</tr></thead>
+        <tbody>${rowsHtml}</tbody></table></div>`;
+}
+
+function renderReport(d) {
+    const data = d.data;
+    lastReport = d.data;
+    const sc = Math.max(data.total, 1);
+
+    // --- KPI ---
+    const kpi = (label, val, color) => `
+        <div class="card" style="padding:14px;text-align:center;flex:1;min-width:130px">
+            <div style="font-size:1.5rem;font-weight:800;color:${color}">${fmtNum(val)}</div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:2px">${escHtml(label)}</div>
+        </div>`;
+    document.getElementById('kpiRow').innerHTML =
+        kpi('Total Scan', data.total, K.primary) +
+        kpi('Pengiriman', data.pengiriman, K.primary) +
+        kpi('Retur', data.retur, K.darkRed) +
+        kpi('Ekspedisi Aktif', data.by_expedition.length, K.blue);
+
+    document.getElementById('reportKeterangan').textContent =
+        `Rentang: ${hmm(data.dari)} — ${hmm(data.sampai)}`;
+
+    // --- Traffic Ekspedisi ---
+    const exps = (data.by_expedition || []).map(e => ({ ...e, _total: e.total }));
+    document.getElementById('secEkspedisi').innerHTML =
+        cardOpen('Banyaknya Traffic Ekspedisi', `<span style="font-size:.72rem;color:var(--text-muted)">${fmtNum(exps.length)} ekspedisi</span>`) +
+        legend() +
+        `<div id="expBars"></div>` +
+        `<div style="margin-top:12px" id="expTable"></div>` +
+        cardClose();
+    renderHbars('expBars', exps, it => `${it.nama || it.kode}`, sc);
+    renderTable('expTable',
+        ['Ekspedisi', 'Kode', 'Pengiriman', 'Retur', 'Total'],
+        exps.map(e => `<tr>
+            <td>${escHtml(e.nama || e.kode)}</td>
+            <td>${escHtml(e.kode)}</td>
+            <td class="c-num">${fmtNum(e.pengiriman)}</td>
+            <td class="c-num">${fmtNum(e.retur)}</td>
+            <td class="c-num" style="font-weight:700">${fmtNum(e.total)}</td></tr>`).join('') +
+        `<tr class="total"><td colspan="4" style="text-align:right;font-weight:600">TOTAL</td><td class="c-num" style="font-weight:600">${fmtNum(data.total)}</td></tr>`);
+
+    // --- Tanggal terpadat ---
+    document.getElementById('secDates').innerHTML =
+        cardOpen('Tanggal Terpadat (paling ramai)', `<span style="font-size:.72rem;color:var(--text-muted)">Top ${data.top_dates.length} tanggal</span>`) +
+        `<div id="topBars"></div>` +
+        `<div style="margin-top:12px" id="topTable"></div>` +
+        cardClose();
+    renderVbars('topBars', data.top_dates, it => hmm(it.tanggal).slice(0, 5));
+    renderTable('topTable',
+        ['Tanggal', 'Total Scan', 'SubTotal'],
+        data.top_dates.map(it => `<tr>
+            <td>${hmm(it.tanggal)}</td>
+            <td class="c-num" style="font-weight:700">${fmtNum(it.total)}</td>
+            <td class="c-num">${data.total ? Math.round((it.total / data.total) * 100) + '%' : '-'}</td></tr>`).join(''));
+
+    // --- Tren harian (terakhir max 45 hari) ---
+    const trend = (data.by_date || []).slice(-45);
+    document.getElementById('secTrend').innerHTML =
+        cardOpen('Tren Harian', `<span style="font-size:.72rem;color:var(--text-muted)">${trend.length} hari terakhir</span>`) +
+        `<div id="trendBars"></div>` +
+        cardClose();
+    renderVbars('trendBars', trend, it => hmm(it.tanggal).slice(0, 5));
+
+    // --- Per operator ---
+    document.getElementById('secOperator').innerHTML =
+        cardOpen('Scan per Operator', '') +
+        `<div id="opBars"></div>` +
+        `<div style="margin-top:12px" id="opTable"></div>` +
+        cardClose();
+    const ops = (data.by_operator || []).map(o => ({ ...o, _total: data.total }));
+    renderHbars('opBars', ops, it => it.username, data.total);
+    renderTable('opTable',
+        ['Operator', 'Total'],
+        ops.map(o => `<tr><td>${escHtml(o.username)}</td><td class="c-num" style="font-weight:700">${fmtNum(o.total)}</td></tr>`).join(''));
+
+    // --- Per toko ---
+    document.getElementById('secToko').innerHTML =
+        cardOpen('Scan per Toko / Gudang', '') +
+        `<div id="tokoBars"></div>` +
+        `<div style="margin-top:12px" id="tokoTable"></div>` +
+        cardClose();
+    const toks = (data.by_toko || []).map(t => ({ ...t, _total: data.total }));
+    renderHbars('tokoBars', toks, it => it.toko, data.total);
+    renderTable('tokoTable',
+        ['Toko / Gudang', 'Total'],
+        toks.map(t => `<tr><td>${escHtml(t.toko)}</td><td class="c-num" style="font-weight:700">${fmtNum(t.total)}</td></tr>`).join(''));
+
+    // --- Resi kembar ---
+    document.getElementById('secDup').innerHTML =
+        cardOpen('Nomor Resi Kembar (discan lebih dari sekali)', `<span style="font-size:.72rem;color:var(--text-muted)">${data.duplikat_resi.length} resi</span>`) +
+        `<div id="dupTable"></div>` +
+        cardClose();
+    renderTable('dupTable',
+        ['Nomor Resi', 'Jumlah Scan', 'Tanggal Awal', 'Tanggal Akhir'],
+        data.duplikat_resi.map(r => `<tr>
+            <td style="font-weight:600">${escHtml(r.no_resi)}</td>
+            <td class="c-num" style="font-weight:700">${fmtNum(r.jumlah)}x</td>
+            <td>${hmm(r.tanggal_awal)}</td>
+            <td>${hmm(r.tanggal_akhir)}</td></tr>`).join(''));
+}
+
+async function loadReport() {
+    const body = document.getElementById('reportBody');
+    const secs = [
+        { id: 'secEkspedisi' }, { id: 'secDates' }, { id: 'secTrend' },
+        { id: 'secOperator' }, { id: 'secToko' }, { id: 'secDup' },
+    ];
+    body.innerHTML =
+        `<div id="kpiRow" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:var(--space-md);opacity:.6">${[1,2,3,4].map(() => '<div class="card" style="padding:14px;flex:1;min-width:130px"><div class="skeleton-card" style="height:22px"></div></div>').join('')}</div>` +
+        secs.map(s => `<div id="${s.id}"></div>`).join('');
+
+    document.getElementById('reportKeterangan').textContent = 'Memuat…';
+
+    const from = document.getElementById('fromDate').value;
+    const to = document.getElementById('toDate').value;
+    let path = '/scan-list?mode=report';
+    if (from) path += '&from=' + encodeURIComponent(from);
+    if (to) path += '&to=' + encodeURIComponent(to);
+
+    let d;
+    try {
+        d = await api(path);
+        if (!d.success) throw new Error(d.message || 'Gagal memuat laporan');
+    } catch (e) {
+        body.innerHTML = `<div class="card" style="padding:var(--space-md)"><div class="empty-state"><p>${escHtml(e.message || 'Terjadi kesalahan')}</p></div></div>`;
+        document.getElementById('reportKeterangan').textContent = '';
+        return;
+    }
+    renderReport(d);
+}
+
+// ============ EXPORT PDF & CSV ============
+function exportReportPdf() {
+    if (!lastReport) { showToast('Muat laporan dulu sebelum export.', 'error'); return; }
+    const d = lastReport;
+    const maxExp = Math.max(...(d.by_expedition || []).map(e => e.total), 1);
+    const bar = (val, max, color) => `<div style="height:10px;background:#eee;border-radius:5px;overflow:hidden"><div style="height:100%;width:${Math.max(2, (val / max) * 100)}%;background:${color}"></div></div>`;
+
+    const expRows = (d.by_expedition || []).map(e => `
+        <tr>
+            <td>${escHtml(e.nama || e.kode)}</td>
+            <td>${escHtml(e.kode)}</td>
+            <td class="c-num">${fmtNum(e.pengiriman)}</td>
+            <td class="c-num">${fmtNum(e.retur)}</td>
+            <td class="c-num"><b>${fmtNum(e.total)}</b></td>
+        </tr>`).join('');
+    const expBars = (d.by_expedition || []).map(e => `
+        <div style="margin:5px 0">
+            <div style="display:flex;justify-content:space-between;font-size:11px"><b>${escHtml(e.nama || e.kode)}</b><span>${fmtNum(e.pengiriman)} kirim · ${fmtNum(e.retur)} retur = ${fmtNum(e.total)}</span></div>
+            ${bar(e.total, maxExp, '#C8102E')}
+        </div>`).join('') || '<i>Tidak ada data</i>';
+
+    const dateRows = (d.top_dates || []).map(t => `
+        <tr><td>${hmm(t.tanggal)}</td><td class="c-num"><b>${fmtNum(t.total)}</b></td><td class="c-num">${d.total ? Math.round((t.total / d.total) * 100) + '%' : '-'}</td></tr>`).join('');
+    const opRows = (d.by_operator || []).map(o => `<tr><td>${escHtml(o.username)}</td><td class="c-num"><b>${fmtNum(o.total)}</b></td></tr>`).join('');
+    const tkRows = (d.by_toko || []).map(t => `<tr><td>${escHtml(t.toko)}</td><td class="c-num"><b>${fmtNum(t.total)}</b></td></tr>`).join('');
+    const dupRows = (d.duplikat_resi || []).map(r => `<tr><td>${escHtml(r.no_resi)}</td><td class="c-num"><b>${fmtNum(r.jumlah)}x</b></td><td>${hmm(r.tanggal_awal)}</td><td>${hmm(r.tanggal_akhir)}</td></tr>`).join('');
+
+    const kpi = (label, val) => `<div style="flex:1;border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center;margin:4px"><div style="font-size:18px;font-weight:bold;color:#C8102E">${fmtNum(val)}</div><div style="font-size:10px;color:#555">${escHtml(label)}</div></div>`;
+
+    const win = window.open('', '_blank');
+    if (!win) { showToast('Izinkan popup untuk export PDF.', 'error'); return; }
+    win.document.open();
+    win.document.write(`<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Laporan Grafik - ScanChecker</title>
+<style>
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; margin: 20px; }
+.head { text-align: center; border-bottom: 3px solid #C8102E; padding-bottom: 10px; margin-bottom: 14px; }
+.head h1 { margin: 0; font-size: 20px; color: #C8102E; }
+.head .sub { color: #555; font-size: 11px; margin-top: 4px; }
+.kpis { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+h3 { color: #8E1B2E; font-size: 13px; margin: 18px 0 6px; border-left: 4px solid #C8102E; padding-left: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: left; font-size: 11px; }
+th { background: #8E1B2E; color: #fff; font-weight: bold; white-space: nowrap; }
+tr:nth-child(even) td { background: #faf0f1; }
+tr.total td { background: #F7DADD; font-weight: bold; }
+.c-num { text-align: right; white-space: nowrap; }
+.foot { margin-top: 22px; font-size: 10px; color: #666; text-align: center; border-top: 1px solid #ccc; padding-top: 8px; }
+@media print { body { margin: 12px; } }
+</style>
+</head>
+<body onload="setTimeout(function(){window.print()},400)">
+    <div class="head">
+        <h1>RankSports — Laporan Grafik ScanChecker</h1>
+        <div class="sub">Rentang: ${hmm(d.dari)} s.d ${hmm(d.sampai)} &nbsp;|&nbsp; Dicetak: ${new Date().toLocaleString('id-ID')} oleh ${escHtml(currentUser ? currentUser.nama : '-')}</div>
+    </div>
+
+    <div class="kpis">${kpi('Total Scan', d.total)}${kpi('Pengiriman', d.pengiriman)}${kpi('Retur', d.retur)}${kpi('Ekspedisi Aktif', d.by_expedition.length)}</div>
+
+    <h3>Banyaknya Traffic Ekspedisi</h3>
+    ${expBars}
+    <table>
+        <thead><tr><th>Ekspedisi</th><th>Kode</th><th>Pengiriman</th><th>Retur</th><th>Total</th></tr></thead>
+        <tbody>${expRows}<tr class="total"><td colspan="4" style="text-align:right">TOTAL</td><td class="c-num">${fmtNum(d.total)}</td></tr></tbody>
+    </table>
+
+    <h3>Tanggal Terpadat</h3>
+    <table>
+        <thead><tr><th>Tanggal</th><th>Total Scan</th><th>Proporsi</th></tr></thead>
+        <tbody>${dateRows}</tbody>
+    </table>
+
+    <h3>Scan per Operator</h3>
+    <table>
+        <thead><tr><th>Operator</th><th>Total</th></tr></thead>
+        <tbody>${opRows}</tbody>
+    </table>
+
+    <h3>Scan per Toko / Gudang</h3>
+    <table>
+        <thead><tr><th>Toko / Gudang</th><th>Total</th></tr></thead>
+        <tbody>${tkRows}</tbody>
+    </table>
+
+    <h3>Nomor Resi Kembar</h3>
+    <table>
+        <thead><tr><th>Nomor Resi</th><th>Jumlah Scan</th><th>Tanggal Awal</th><th>Tanggal Akhir</th></tr></thead>
+        <tbody>${dupRows}</tbody>
+    </table>
+
+    <div class="foot">Dibuat oleh Muhammad Irfandi &copy; 2026 ScanChecker v2.0</div>
+</body>
+</html>`);
+    win.document.close();
+}
+
+function csvCell(v) {
+    v = String(v === null || v === undefined ? '' : v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+
+function exportReportCsv() {
+    if (!lastReport) { showToast('Muat laporan dulu sebelum export.', 'error'); return; }
+    const d = lastReport;
+    const L = [];
+    L.push('Laporan Grafik ScanChecker');
+    L.push('Rentang,' + csvCell(d.dari + ' s.d ' + d.sampai));
+    L.push('Total Scan,' + d.total);
+    L.push('Pengiriman,' + d.pengiriman);
+    L.push('Retur,' + d.retur);
+    L.push('');
+    L.push('=== Traffic Ekspedisi ===');
+    L.push('Ekspedisi,Kode,Pengiriman,Retur,Total');
+    (d.by_expedition || []).forEach(e => L.push([csvCell(e.nama || e.kode), csvCell(e.kode), e.pengiriman, e.retur, e.total].join(',')));
+    L.push('');
+    L.push('=== Tanggal Terpadat ===');
+    L.push('Tanggal,Total Scan,Proporsi');
+    (d.top_dates || []).forEach(t => L.push([t.tanggal, t.total, d.total ? Math.round((t.total / d.total) * 100) + '%' : '-'].join(',')));
+    L.push('');
+    L.push('=== Scan per Operator ===');
+    L.push('Operator,Total');
+    (d.by_operator || []).forEach(o => L.push([csvCell(o.username), o.total].join(',')));
+    L.push('');
+    L.push('=== Scan per Toko / Gudang ===');
+    L.push('Toko,Total');
+    (d.by_toko || []).forEach(t => L.push([csvCell(t.toko), t.total].join(',')));
+    L.push('');
+    L.push('=== Nomor Resi Kembar ===');
+    L.push('Nomor Resi,Jumlah Scan,Tanggal Awal,Tanggal Akhir');
+    (d.duplikat_resi || []).forEach(r => L.push([csvCell(r.no_resi), r.jumlah, r.tanggal_awal, r.tanggal_akhir].join(',')));
+
+    const blob = new Blob(['\uFEFF' + L.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const name = 'laporan_scanchecker_' + d.dari + '_' + d.sampai + '.csv';
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 3000);
+    showToast('CSV siap: ' + name, 'success');
+}
+
+(async function init() {
+    currentUser = await initApp();
+    if (!currentUser) return;
+    if (currentUser.role !== 'admin') { window.location.href = '/'; return; }
+    document.getElementById('umName').textContent = currentUser.nama;
+    document.getElementById('umRole').textContent = currentUser.toko + ' • ' + currentUser.role;
+    document.querySelector('.user-avatar-lg').textContent = (currentUser.nama || '?').charAt(0).toUpperCase();
+    document.getElementById('fromDate').value = dateStr(-29);
+    document.getElementById('toDate').value = dateStr(0);
+    await applyDarkMode();
+    loadReport();
+})();
+</script>
+</body>
+</html>
